@@ -1,0 +1,5 @@
+numpy>=1.24
+matplotlib>=3.7
+jupyter
+# Optional, only to regenerate the P.452-16 table:
+# pycraf>=2.1
