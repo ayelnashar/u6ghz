@@ -1,6 +1,8 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite the paper below."
 title: "Upper 6 GHz Interference and Coexistence Simulator"
+version: 1.1.0
+date-released: 2026-11-11
 authors:
   - family-names: Elnashar
     given-names: Ayman
@@ -10,6 +12,8 @@ authors:
   - family-names: Muhaidat
     given-names: Sami
 license: MIT
+repository-code: "https://github.com/etisalat-uae-lab/u6ghz"
+url: "https://etisalat-uae-lab.github.io/u6ghz/"
 preferred-citation:
   type: article
   title: "Interference and Coexistence in the Upper 6 GHz Band: A Practical Framework for 5G-Advanced and 6G Giga-MIMO Deployment"
@@ -22,3 +26,4 @@ preferred-citation:
       given-names: Sami
   journal: "IEEE Open Journal of the Communications Society"
   year: 2026
+  url: "https://ieeexplore.ieee.org/document/11774859"

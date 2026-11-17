@@ -3,227 +3,316 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>U6 GHz Coexistence Simulator (n104)</title>
+<title>U6 GHz Coexistence Simulator (n104) v1.1</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
   :root{
-    --bg:#0c0e12; --panel:#14171d; --panel2:#1b1f27; --line:#262b35;
-    --ink:#e8ebf0; --ink-dim:#9aa3b2; --ink-faint:#5c6573;
-    --cyan:#37c6d0; --amber:#f2a93b; --violet:#8b6df0; --red:#ec4a4a; --green:#3ecf8e;
+    --bg:#0c0e12; --panel:#14171d; --panel2:#1b1f27; --line:#2c323d;
+    --ink:#eef1f5; --ink-dim:#b3bbc8; --ink-faint:#8b94a3;
+    --cyan:#37c6d0; --amber:#f2a93b; --violet:#a08af5; --red:#ef5a5a; --green:#3ecf8e;
     --grid:rgba(255,255,255,.04); --r:10px;
   }
   *{box-sizing:border-box}
   html{scroll-behavior:smooth}
   body{margin:0;background:var(--bg);color:var(--ink);font-family:'Space Grotesk',system-ui,sans-serif;font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  a{color:var(--cyan)}
   .mono{font-family:'IBM Plex Mono',monospace}
-  header{border-bottom:1px solid var(--line);padding:22px 28px 18px;position:sticky;top:0;z-index:50;backdrop-filter:blur(8px);background-color:rgba(12,14,18,.82)}
-  .h-top{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+  header{border-bottom:1px solid var(--line);padding:18px 28px 14px;position:sticky;top:0;z-index:50;backdrop-filter:blur(8px);background-color:rgba(12,14,18,.88)}
+  .h-top{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
   h1{font-size:19px;font-weight:700;margin:0;letter-spacing:-.01em}
   .h-sub{color:var(--ink-dim);font-size:13px}
+  .h-links{margin-left:auto;font-size:12.5px;display:flex;gap:14px;flex-wrap:wrap}
   .badge{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;padding:3px 8px;border-radius:5px;border:1px solid var(--line);color:var(--amber);background:rgba(242,169,59,.08)}
   .badge.reg{color:var(--cyan);background:rgba(55,198,208,.08)}
-  .specwrap{padding:16px 28px 6px;border-bottom:1px solid var(--line);background:var(--panel)}
-  .spec-label{display:flex;justify-content:space-between;align-items:baseline;font-size:12px;color:var(--ink-dim);margin-bottom:8px}
-  .spectrum{position:relative;height:62px;border-radius:8px;overflow:hidden;border:1px solid var(--line);background:repeating-linear-gradient(90deg,var(--grid) 0 1px,transparent 1px 40px),linear-gradient(90deg,rgba(55,198,208,.16) 0%,rgba(55,198,208,.16) 41.6%,rgba(242,169,59,.16) 41.6%,rgba(242,169,59,.16) 100%)}
+  .specwrap{padding:14px 28px 6px;border-bottom:1px solid var(--line);background:var(--panel)}
+  .spec-label{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;font-size:12.5px;color:var(--ink-dim);margin-bottom:8px}
+  .spectrum{position:relative;height:70px;border-radius:8px;overflow:hidden;border:1px solid var(--line);background:repeating-linear-gradient(90deg,var(--grid) 0 1px,transparent 1px 40px),linear-gradient(90deg,rgba(55,198,208,.14) 0%,rgba(55,198,208,.14) 41.667%,rgba(242,169,59,.14) 41.667%,rgba(242,169,59,.14) 100%)}
   .spectrum .edge{position:absolute;top:0;bottom:0;width:1px;background:var(--ink-faint)}
-  .spectrum .lbl{position:absolute;bottom:4px;font-size:10px;font-family:'IBM Plex Mono',monospace;color:var(--ink-dim);transform:translateX(-50%)}
-  .spectrum .split-tag{position:absolute;top:5px;font-size:10px;font-family:'IBM Plex Mono',monospace;transform:translateX(-50%)}
-  .alloc{position:absolute;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:10px;font-family:'IBM Plex Mono',monospace;font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,.35)}
-  .alloc.imt{background:linear-gradient(180deg,#f2a93b,#cf8a23);color:#1a1205;top:8px;height:18px}
-  .alloc.wifi{background:linear-gradient(180deg,#37c6d0,#2596a0);color:#04201f;top:30px;height:18px;opacity:.92}
-  .alloc.fs{top:8px;height:40px;width:3px;background:var(--red);box-shadow:0 0 8px var(--red)}
-  .alloc.fs::after{content:'FS';position:absolute;top:-2px;left:5px;font-size:9px;color:var(--red)}
-  .wrap{display:grid;grid-template-columns:320px 1fr;gap:0;min-height:60vh}
+  .spectrum .lbl{position:absolute;bottom:3px;font-size:10.5px;font-family:'IBM Plex Mono',monospace;color:var(--ink-dim);transform:translateX(-50%)}
+  .spectrum .split-tag{position:absolute;top:4px;font-size:10.5px;font-family:'IBM Plex Mono',monospace;transform:translateX(-50%)}
+  .alloc{position:absolute;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:10.5px;font-family:'IBM Plex Mono',monospace;font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,.35);white-space:nowrap;overflow:hidden}
+  .alloc.imt{background:linear-gradient(180deg,#f2a93b,#cf8a23);color:#1a1205;top:20px;height:16px}
+  .alloc.wifi{background:linear-gradient(180deg,#37c6d0,#2596a0);color:#04201f;top:39px;height:14px;opacity:.95}
+  .alloc.prim{background:#e8ebf0;top:39px;height:14px;width:3px;box-shadow:none}
+  .alloc.fs{top:18px;height:38px;background:rgba(239,90,90,.35);border:1px solid var(--red);box-shadow:0 0 8px rgba(239,90,90,.6)}
+  .wrap{display:grid;grid-template-columns:330px 1fr;gap:0;min-height:60vh}
   @media(max-width:900px){.wrap{grid-template-columns:1fr}}
-  aside{border-right:1px solid var(--line);padding:18px 20px;background:var(--panel);overflow-y:auto}
+  aside{border-right:1px solid var(--line);padding:16px 20px;background:var(--panel);overflow-y:auto}
   @media(max-width:900px){aside{border-right:none;border-bottom:1px solid var(--line)}}
-  .ctl-group{margin-bottom:20px}
-  .ctl-group h3{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-faint);margin:0 0 12px;font-weight:600}
-  .ctl{margin-bottom:13px}
-  .ctl label{display:flex;justify-content:space-between;font-size:12.5px;color:var(--ink-dim);margin-bottom:5px}
-  .ctl label .val{color:var(--amber);font-family:'IBM Plex Mono',monospace;font-weight:500}
-  .ctl label .val.v{color:var(--violet)} .ctl label .val.c{color:var(--cyan)}
+  .ctl-group{margin-bottom:18px}
+  .ctl-group h3{font-size:11.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-faint);margin:0 0 10px;font-weight:600}
+  .ctl{margin-bottom:12px}
+  .ctl label{display:flex;justify-content:space-between;gap:8px;font-size:13px;color:var(--ink-dim);margin-bottom:5px}
+  .ctl label .val{color:var(--amber);font-family:'IBM Plex Mono',monospace;font-weight:500;text-align:right}
+  .ctl label .val.v{color:var(--violet)} .ctl label .val.c{color:var(--cyan)} .ctl label .val.r{color:var(--red)}
+  .ctl .hint{font-size:11.5px;color:var(--ink-faint);margin-top:4px;line-height:1.4}
   input[type=range]{width:100%;-webkit-appearance:none;height:4px;border-radius:2px;background:var(--line);outline:none}
   input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;border-radius:50%;background:var(--amber);cursor:pointer;border:2px solid #0c0e12;box-shadow:0 0 0 1px var(--amber)}
   input[type=range].v::-webkit-slider-thumb{background:var(--violet);box-shadow:0 0 0 1px var(--violet)}
   input[type=range].c::-webkit-slider-thumb{background:var(--cyan);box-shadow:0 0 0 1px var(--cyan)}
+  input[type=range].r::-webkit-slider-thumb{background:var(--red);box-shadow:0 0 0 1px var(--red)}
+  input[type=range]:disabled{opacity:.35}
+  input[type=number]{width:90px;background:var(--panel2);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:4px 8px;font-family:'IBM Plex Mono',monospace;font-size:12.5px}
   .seg{display:flex;gap:4px;flex-wrap:wrap}
-  .seg button{flex:1;min-width:0;background:var(--panel2);color:var(--ink-dim);border:1px solid var(--line);border-radius:6px;padding:6px 4px;font-size:11px;cursor:pointer;font-family:'IBM Plex Mono',monospace;transition:.12s}
+  .seg button,.btn{flex:1;min-width:0;background:var(--panel2);color:var(--ink-dim);border:1px solid var(--line);border-radius:6px;padding:6px 4px;font-size:11.5px;cursor:pointer;font-family:'IBM Plex Mono',monospace;transition:.12s}
   .seg button.on{background:rgba(242,169,59,.14);color:var(--amber);border-color:var(--amber)}
   .seg.c button.on{background:rgba(55,198,208,.14);color:var(--cyan);border-color:var(--cyan)}
-  .seg.v button.on{background:rgba(139,109,240,.14);color:var(--violet);border-color:var(--violet)}
-  main{padding:20px 24px;overflow-y:auto}
+  .seg.v button.on{background:rgba(160,138,245,.14);color:var(--violet);border-color:var(--violet)}
+  .seg.r button.on{background:rgba(239,90,90,.14);color:var(--red);border-color:var(--red)}
+  .btn:hover,.seg button:hover{color:var(--ink)}
+  .btnrow{display:flex;gap:6px;margin-top:6px}
+  main{padding:20px 24px;overflow-y:auto;min-width:0}
+  .notice{border:1px solid rgba(242,169,59,.45);background:rgba(242,169,59,.07);border-radius:var(--r);padding:12px 16px;margin-bottom:18px;font-size:13px;color:var(--ink-dim);line-height:1.55}
+  .notice b{color:var(--ink)}
   .verdict-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
-  @media(max-width:1100px){.verdict-row{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:1200px){.verdict-row{grid-template-columns:repeat(2,1fr)}}
   @media(max-width:560px){.verdict-row{grid-template-columns:1fr}}
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px 15px 16px;position:relative;overflow:visible;min-height:104px;display:flex;flex-direction:column}
-  .card .vic{font-size:12px;color:var(--ink-dim);margin-bottom:3px;padding-right:52px}
-  .card .pair{font-size:10px;color:var(--ink-faint);font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.05em;padding-right:52px}
-  .card .metric{font-size:27px;line-height:1.15;font-weight:700;margin:8px 0 2px;font-family:'IBM Plex Mono',monospace;letter-spacing:-.02em;white-space:nowrap}
-  .card .limit{font-size:11px;color:var(--ink-faint);font-family:'IBM Plex Mono',monospace}
-  .card .status{position:absolute;top:13px;right:13px;font-size:10px;font-weight:600;padding:3px 7px;border-radius:4px;font-family:'IBM Plex Mono',monospace;z-index:2}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px 15px 16px;position:relative;min-height:120px;display:flex;flex-direction:column}
+  .card .vic{font-size:13px;color:var(--ink-dim);margin-bottom:2px;padding-right:56px}
+  .card .pair{font-size:10.5px;color:var(--ink-faint);font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.05em;padding-right:56px}
+  .card .metric{font-size:26px;line-height:1.15;font-weight:700;margin:8px 0 2px;font-family:'IBM Plex Mono',monospace;letter-spacing:-.02em;white-space:nowrap}
+  .card .limit{font-size:11.5px;color:var(--ink-faint);font-family:'IBM Plex Mono',monospace}
+  .card .kind{font-size:11px;color:var(--ink-faint);margin-top:3px}
+  .card .status{position:absolute;top:13px;right:13px;font-size:10.5px;font-weight:600;padding:3px 7px;border-radius:4px;font-family:'IBM Plex Mono',monospace}
   .status.pass{background:rgba(62,207,142,.15);color:var(--green)}
-  .status.fail{background:rgba(236,74,74,.15);color:var(--red)}
-  .card .bar{position:absolute;left:0;bottom:0;height:3px;transition:.3s;border-radius:0 0 var(--r) var(--r)}
+  .status.fail{background:rgba(239,90,90,.15);color:var(--red)}
+  .card .bar{position:absolute;left:0;bottom:0;height:3px;border-radius:0 0 var(--r) var(--r)}
   .card.pass .bar{background:var(--green)} .card.fail .bar{background:var(--red)}
   .panel-block{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:18px 20px;margin-bottom:18px}
-  .panel-block h2{font-size:14px;margin:0 0 4px;font-weight:600}
-  .panel-block .desc{font-size:12px;color:var(--ink-dim);margin:0 0 16px}
-  table{width:100%;border-collapse:collapse;font-size:12.5px}
-  th,td{padding:8px 10px;text-align:right;border-bottom:1px solid var(--line)}
+  .panel-block h2{font-size:15px;margin:0 0 4px;font-weight:600}
+  .panel-block .desc{font-size:13px;color:var(--ink-dim);margin:0 0 14px;line-height:1.55}
+  .tablewrap{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{padding:7px 9px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
   th{color:var(--ink-faint);font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.04em}
   td:first-child,th:first-child{text-align:left;color:var(--ink-dim)}
   td.mono{font-family:'IBM Plex Mono',monospace}
+  tr.sep td{color:var(--ink-faint);font-size:11px;text-transform:uppercase;letter-spacing:.05em;padding-top:14px}
+  tr.trial td{color:var(--ink-faint);font-style:italic}
   .cell-good{color:var(--green)} .cell-mid{color:var(--amber)} .cell-bad{color:var(--red)}
-  .ov-chip{display:inline-block;padding:1px 6px;border-radius:4px;font-size:10px;font-family:'IBM Plex Mono',monospace}
+  .ov-chip{display:inline-block;padding:1px 6px;border-radius:4px;font-size:11px;font-family:'IBM Plex Mono',monospace}
   canvas{width:100%;display:block}
-  .legend{display:flex;gap:16px;font-size:11px;color:var(--ink-dim);margin-top:8px;flex-wrap:wrap}
+  .legend{display:flex;gap:16px;font-size:12px;color:var(--ink-dim);margin-top:8px;flex-wrap:wrap}
   .legend span{display:flex;align-items:center;gap:5px}
-  .swatch{width:11px;height:3px;border-radius:2px;display:inline-block}
+  .swatch{width:12px;height:3px;border-radius:2px;display:inline-block}
   .mit-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
   @media(max-width:700px){.mit-grid{grid-template-columns:1fr}}
   .mit{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:12px 13px}
-  .mit .mh{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px}
-  .mit .mname{font-size:13px;font-weight:600}
-  .mit .mdb{font-family:'IBM Plex Mono',monospace;font-size:14px;color:var(--violet);font-weight:600}
-  .mit .mnote{font-size:11px;color:var(--ink-dim);line-height:1.45}
-  .mit .mfeas{font-size:10px;font-family:'IBM Plex Mono',monospace;margin-top:6px;color:var(--ink-faint)}
-  .mit.eff{border-color:rgba(139,109,240,.4)}
-  footer{padding:18px 28px 28px;border-top:1px solid var(--line);color:var(--ink-faint);font-size:11px;line-height:1.6}
-  .prov{color:var(--ink-faint);font-size:10.5px;font-family:'IBM Plex Mono',monospace}
+  .mit .mh{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:4px}
+  .mit .mname{font-size:13.5px;font-weight:600}
+  .mit .mdb{font-family:'IBM Plex Mono',monospace;font-size:14px;color:var(--violet);font-weight:600;text-align:right}
+  .mit .mnote{font-size:12px;color:var(--ink-dim);line-height:1.45}
+  .mit .mfeas{font-size:11px;font-family:'IBM Plex Mono',monospace;margin-top:6px;color:var(--ink-faint)}
+  .mit.eff{border-color:rgba(160,138,245,.45)}
+  .ul-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:12px}
+  @media(max-width:700px){.ul-grid{grid-template-columns:1fr}}
+  .ul-box{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:12px 14px}
+  .chip{display:inline-block;padding:2px 9px;border-radius:10px;font-size:11px;font-weight:600}
+  .chip.ok{background:rgba(62,207,142,.16);color:var(--green)} .chip.no{background:rgba(239,90,90,.16);color:var(--red)}
+  footer{padding:18px 28px 28px;border-top:1px solid var(--line);color:var(--ink-faint);font-size:12px;line-height:1.65}
+  .prov{color:var(--ink-faint);font-size:11px;font-family:'IBM Plex Mono',monospace}
   .flag{color:var(--amber)}
+  .busy{opacity:.55}
 </style>
 </head>
 <body>
 <header>
   <div class="h-top">
     <h1>U6 GHz Coexistence Simulator</h1>
-    <span class="badge">3GPP n104</span>
+    <span class="badge">v1.1</span>
     <span class="badge reg">n104 · 6425–7125 MHz</span>
-    <span class="h-sub">Interference &amp; mitigation across IMT · Wi-Fi · Fixed Service · FSS</span>
+    <span class="h-sub">IMT · Wi-Fi · Fixed Service · FSS</span>
+    <span class="h-links"><a href="https://github.com/etisalat-uae-lab/u6ghz" target="_blank" rel="noopener">Code and notebook</a><a href="https://ieeexplore.ieee.org/document/11774859" target="_blank" rel="noopener">Paper (IEEE OJ-COMS)</a><a href="https://github.com/etisalat-uae-lab/u6ghz/blob/main/CHANGELOG.md" target="_blank" rel="noopener">v1.1 changes</a></span>
   </div>
 </header>
 <div class="specwrap">
   <div class="spec-label">
-    <span>6 GHz band occupancy: move the operator block, Wi-Fi channel &amp; guard band</span>
+    <span>Band occupancy: operator block (amber), Wi-Fi channel (cyan, white tick = primary 20 MHz), Fixed-Service channel (red)</span>
     <span class="mono" id="specReadout"></span>
   </div>
   <div class="spectrum" id="spectrum">
-    <div class="edge" style="left:0%"></div>
-    <div class="edge" style="left:41.6%"></div>
-    <div class="edge" style="left:100%"></div>
-    <div class="split-tag" style="left:20%;color:var(--cyan)">L6 · Wi-Fi (5925–6425)</div>
-    <div class="split-tag" style="left:70%;color:var(--amber)">U6 · IMT n104 (6425–7125)</div>
-    <div class="lbl" style="left:0%">5925</div>
-    <div class="lbl" style="left:41.6%">6425</div>
-    <div class="lbl" style="left:100%">7125</div>
+    <div class="edge" style="left:0%"></div><div class="edge" style="left:41.667%"></div><div class="edge" style="left:100%"></div>
+    <div class="split-tag" style="left:20.8%;color:var(--cyan)">L6 · Wi-Fi in the UAE (5925–6425)</div>
+    <div class="split-tag" style="left:70.8%;color:var(--amber)">U6 · IMT n104 (6425–7125)</div>
+    <div class="lbl" style="left:2%">5925</div><div class="lbl" style="left:41.667%">6425</div><div class="lbl" style="left:97.5%">7125</div>
     <div class="alloc imt" id="allocImt">IMT</div>
     <div class="alloc wifi" id="allocWifi">Wi-Fi</div>
+    <div class="alloc prim" id="allocPrim"></div>
     <div class="alloc fs" id="allocFs"></div>
   </div>
 </div>
 <div class="wrap">
   <aside>
     <div class="ctl-group">
-      <h3>Operator block (editable)</h3>
-      <div class="ctl"><label>Centre frequency <span class="val" id="vCenter">6625 MHz</span></label><input type="range" id="center" min="6525" max="7025" value="6625" step="5"></div>
-      <div class="ctl"><label>Block bandwidth <span class="val" id="vBw">200 MHz</span></label><input type="range" id="bw" min="80" max="400" value="200" step="20"></div>
+      <h3>Operator block</h3>
+      <div class="ctl"><div class="seg" id="presetSeg"><button data-v="ref">Reference 6525–6725</button><button data-v="uae">UAE 6425–6775</button></div></div>
+      <div class="ctl"><label for="center">Centre frequency <span class="val" id="vCenter"></span></label><input type="range" id="center" min="6525" max="7025" step="5"></div>
+      <div class="ctl"><label for="bw">Block bandwidth <span class="val" id="vBw"></span></label><input type="range" id="bw" min="80" max="400" step="10"><div class="hint" id="carrierHint"></div></div>
     </div>
     <div class="ctl-group">
       <h3>IMT deployment</h3>
-      <div class="ctl"><label>Array (Giga-MIMO)</label><div class="seg" id="arraySeg"><button data-v="macro_64">64-TRX</button><button data-v="macro_128">128-TRX</button><button data-v="giga_256" class="on">256-TRX</button></div></div>
-      <div class="ctl"><label>Max EIRP <span class="val" id="vEirp">75 dBm</span></label><input type="range" id="eirp" min="58" max="78" value="75" step="1"></div>
-      <div class="ctl"><label>Inter-site distance <span class="val" id="vIsd">400 m</span></label><input type="range" id="isd" min="200" max="1500" value="400" step="50"></div>
-      <div class="ctl"><label>Network size <span class="val" id="vRings">37 sites</span></label><input type="range" id="rings" min="1" max="4" value="3" step="1"></div>
-      <div class="ctl"><label>Building type</label><div class="seg c" id="bldgSeg"><button data-v="traditional">Traditional</button><button data-v="thermally_efficient" class="on">Low-E glass</button></div></div>
+      <div class="ctl"><label>Array (M.2101)</label><div class="seg" id="arraySeg"><button data-v="macro_64">64-TRX</button><button data-v="macro_128">128-TRX</button><button data-v="giga_256">256-TRX</button></div></div>
+      <div class="ctl"><label for="eirp">Max EIRP <span class="val" id="vEirp"></span></label><input type="range" id="eirp" min="58" max="78" step="1"></div>
+      <div class="ctl"><label for="isd">Inter-site distance <span class="val" id="vIsd"></span></label><input type="range" id="isd" min="200" max="1500" step="50"></div>
+      <div class="ctl"><label for="rings">Network size <span class="val" id="vRings"></span></label><input type="range" id="rings" min="1" max="4" step="1"></div>
+      <div class="ctl"><label>Building type (P.2109)</label><div class="seg" id="bldgSeg"><button data-v="traditional">Traditional</button><button data-v="thermally_efficient">Low-E glass</button></div></div>
+      <div class="ctl"><label>Terminal (coverage)</label><div class="seg" id="termSeg"><button data-v="cpe_4x4">FWA CPE 4×4</button><button data-v="handheld">Handheld</button></div></div>
     </div>
     <div class="ctl-group">
-      <h3>Wi-Fi channel</h3>
-      <div class="ctl"><label>Primary centre <span class="val c" id="vWifi">7055 MHz</span></label><input type="range" class="c" id="wifiC" min="6815" max="7095" value="7055" step="20"></div>
-      <div class="ctl"><label>Channel width</label><div class="seg c" id="wifiBwSeg"><button data-v="80">80 MHz</button><button data-v="160" class="on">160 MHz</button></div></div>
+      <h3>Wi-Fi channel (802.11ax raster)</h3>
+      <div class="ctl"><label>Channel width</label><div class="seg c" id="wifiWSeg"><button data-v="20">20</button><button data-v="40">40</button><button data-v="80">80</button><button data-v="160">160 MHz</button></div></div>
+      <div class="ctl"><label for="wifiIdx">Primary channel <span class="val c" id="vWifiIdx"></span></label><input type="range" class="c" id="wifiIdx" min="0" max="10" step="1"></div>
     </div>
     <div class="ctl-group">
-      <h3>Mitigations applied</h3>
-      <div class="ctl"><label>Guard band <span class="val v" id="vGuard">0 MHz</span></label><input type="range" class="v" id="guard" min="0" max="200" value="0" step="5"></div>
-      <div class="ctl"><label>FS separation <span class="val v" id="vSep">5.0 km</span></label><input type="range" class="v" id="sep" min="1" max="40" value="5" step="0.5"></div>
-      <div class="ctl"><label>Downtilt / power cut <span class="val v" id="vPwr">0 dB</span></label><input type="range" class="v" id="pwr" min="0" max="20" value="0" step="1"></div>
-      <div class="ctl"><label>Beam avoidance</label><div class="seg v" id="beamSeg"><button data-v="0" class="on">Off</button><button data-v="1">On</button></div></div>
-      <div class="ctl"><label>AFC (registered FS)</label><div class="seg v" id="afcSeg"><button data-v="0" class="on">Off</button><button data-v="1">On</button></div></div>
+      <h3>Fixed-Service victim</h3>
+      <div class="ctl"><label>Channel placement</label><div class="seg r" id="fsChanSeg"><button data-v="co">Co-channel</button><button data-v="adj">Adjacent</button></div></div>
+      <div class="ctl"><label for="guard">Edge clearance <span class="val r" id="vGuard"></span></label><input type="range" class="r" id="guard" min="0" max="200" step="5"></div>
+      <div class="ctl"><label for="sep">Distance from cluster centre <span class="val r" id="vSep"></span></label><input type="range" class="r" id="sep" min="1" max="80" step="0.5"></div>
+      <div class="ctl"><label for="bearing">Bearing from cluster centre <span class="val r" id="vBearing"></span></label><input type="range" class="r" id="bearing" min="0" max="180" step="15"><div class="hint">Sector boresights point at 0°, 120° and 240°. The paper's reference bearing (45°) is the most favourable of those tested.</div></div>
+      <div class="ctl"><label for="offset">Dish pointing offset from cluster <span class="val r" id="vOffset"></span></label><input type="range" class="r" id="offset" min="0" max="90" step="5"></div>
+      <div class="ctl"><label>Clutter at base stations (P.2108-1)</label><div class="seg r" id="clutSeg"><button data-v="all_median">All sites</button><button data-v="urban">Urban 65%</button><button data-v="suburban">Suburb. 15%</button><button data-v="none">None</button></div><div class="hint">Share of sites below rooftop (WP 5D values for urban and suburban). "All sites" applies the median loss everywhere, the paper's assumption. "None": every site above the clutter.</div></div>
     </div>
     <div class="ctl-group">
-      <h3>Terminal&#8211;Wi-Fi coupling (uplink)</h3>
-      <div class="ctl"><label>UL device</label><div class="seg v" id="ulDevSeg"><button data-v="handheld" class="on">Handheld</button><button data-v="cpe_rooftop">Rooftop CPE</button></div></div>
-      <div class="ctl"><label>Device&#8211;AP distance <span class="val v" id="vUlDist">20 m</span></label><input type="range" class="v" id="ulDist" min="5" max="200" value="20" step="5"></div>
-      <div class="ctl"><label>AFC channel assignment</label><div class="seg v" id="ulAfcSeg"><button data-v="0" class="on">Off</button><button data-v="1">On</button></div></div>
+      <h3>Mitigations</h3>
+      <div class="ctl"><label for="pwr">EIRP reduction <span class="val v" id="vPwr"></span></label><input type="range" class="v" id="pwr" min="0" max="20" step="1"><div class="hint">Applied to every result, including coverage and cell edge. Mechanical downtilt is not modelled.</div></div>
+      <div class="ctl"><label>Beam avoidance (±30° around the FS)</label><div class="seg v" id="beamSeg"><button data-v="0">Off</button><button data-v="1">On</button></div></div>
+      <div class="hint">AFC is not a separate gain: it acts through the assigned channel and clearance set above.</div>
     </div>
+    <div class="ctl-group">
+      <h3>Monte Carlo</h3>
+      <div class="ctl"><label>Snapshots</label><div class="seg" id="nsnapSeg"><button data-v="400">400 (paper)</button><button data-v="2000">2000</button></div></div>
+      <div class="ctl"><label for="seed">Random seed <input type="number" id="seed" min="0" step="1"></label></div>
+    </div>
+    <div class="ctl-group">
+      <h3>Terminal–Wi-Fi coupling</h3>
+      <div class="ctl"><label>Terminal</label><div class="seg v" id="ulDevSeg"><button data-v="handheld">Handheld</button><button data-v="cpe_rooftop">Rooftop CPE</button></div></div>
+      <div class="ctl"><label for="ulDist">Terminal–AP distance <span class="val v" id="vUlDist"></span></label><input type="range" class="v" id="ulDist" min="5" max="200" step="5"></div>
+      <div class="ctl"><label>Spectrum</label><div class="seg v" id="ulCoordSeg"><button data-v="0">Co-channel</button><button data-v="1">Coordinated</button></div></div>
+    </div>
+    <div class="btnrow"><button class="btn" id="resetBtn">Reset to reference</button><button class="btn" id="linkBtn">Copy scenario link</button></div>
   </aside>
   <main>
+    <div class="notice"><b>Research tool, not a compliance tool.</b> PASS and FAIL apply study criteria to a synthetic hexagonal network. They are not regulatory conclusions and not an assessment of etisalat UAE's or any other operator's network. Version 1.1 corrects the published v1.0 code (Fixed-Service dish pattern, Wi-Fi channel raster, spectral coupling, clutter); some results therefore differ from the paper, as listed in the <a href="https://github.com/etisalat-uae-lab/u6ghz/blob/main/CHANGELOG.md" target="_blank" rel="noopener">changelog</a>.</div>
     <div class="verdict-row" id="verdicts"></div>
     <div class="panel-block">
       <h2>IMT ↔ Wi-Fi coexistence matrix</h2>
-      <p class="desc">Wi-Fi downlink throughput (Mbit/s) as a victim of the mobile network, by Wi-Fi channel placement and mobile traffic state (Engine B). Rows follow the operator block, except the last, which uses the 7050/80 MHz trial carrier and reproduces the calibrated values: centre overlap with an active UE leaves 62 Mbit/s. Zero loss without spectral overlap is imposed by the model, and the calibration is an in-sample fit to the measured trial, not independent validation.</p>
-      <table id="wifiTable"></table>
+      <p class="desc">Wi-Fi downlink throughput (Mbit/s) as a victim of the mobile network, by mobile traffic state (Engine B). The first row uses the operator block and Wi-Fi channel selected in the sidebar. The trial rows are fixed: they use the 7050/80 MHz trial carrier (7010–7090 MHz) and are compared with the BT/Nokia Adastral Park measurements. 193/160 and 221/160 are the same 160 MHz channel (6905–7065 MHz) with different primary channels. The base station emits across the whole block; the active handset transmits on one NR carrier of up to 100 MHz at the block edge nearest the Wi-Fi channel. When the primary 20 MHz channel is clear, the access point may fall back to a narrower clear sub-channel; the "mode" column shows when that gives the better result.</p>
+      <div class="tablewrap"><table id="wifiTable"></table></div>
     </div>
     <div class="panel-block">
-      <h2>Terminal&#8211;Wi-Fi coupling (uplink mode)</h2>
-      <p class="desc">On an uplink-only carrier the device becomes the aggressor instead of the 75 dBm base station: a 26 dBm handheld or a 31 dBm rooftop CPE (EIRP). Both directions of local coupling are evaluated at the device&#8211;AP separation set in the sidebar, with AFC representing frequency coordination.</p>
+      <h2>Terminal–Wi-Fi coupling</h2>
+      <p class="desc">Local coupling between an outdoor IMT terminal and an indoor Wi-Fi access point (building entry included), in both directions, at the separation set in the sidebar. The handheld uses the same antenna in both directions (−4 dBi with 4 dB body loss, 26 dBm conducted, 18 dBm EIRP); the rooftop CPE has a 23 dBi array and a 31 dBm EIRP cap. The terminal transmits on one NR carrier of up to 100 MHz; the access point has 23 dBm EIRP and 6 dBi receive gain. Interference into the serving base-station receiver is not modelled.</p>
       <div id="ulPanel"></div>
     </div>
     <div class="panel-block">
       <h2>Coverage: U6 vs 3.5 GHz downlink</h2>
-      <p class="desc">Indoor (O2I) throughput vs distance, for a user on the array boresight. <span class="flag">Validation mode</span> (matched 80 MHz and equal EIRP) shows U6 below 3.5 GHz at every distance; <span style="color:var(--amber)">operator mode</span> shows the full operator block's uplift near the cell.</p>
+      <p class="desc">Indoor (outdoor-to-indoor) throughput versus distance for a user on the array boresight, at the operator block centre frequency, with building entry loss from P.2109 at each frequency and the terminal selected in the sidebar. The validation curve uses matched 80 MHz bandwidth and equal EIRP; there U6 is below 3.5 GHz at every distance.</p>
       <canvas id="covChart" height="280"></canvas>
-      <div class="legend"><span><i class="swatch" style="background:var(--amber)"></i>U6 (operator block)</span><span><i class="swatch" style="background:#cf8a23"></i>U6 (80 MHz, validation)</span><span><i class="swatch" style="background:var(--cyan)"></i>3.5 GHz (80 MHz)</span></div>
+      <div class="legend"><span><i class="swatch" style="background:var(--amber)"></i>U6 (operator block, selected array)</span><span><i class="swatch" style="background:#b06f12"></i>U6 (80 MHz, equal EIRP)</span><span><i class="swatch" style="background:var(--cyan)"></i>3.5 GHz (80 MHz)</span></div>
     </div>
     <div class="panel-block">
-      <h2>Aggregate I/N distribution into incumbents</h2>
-      <p class="desc">Monte-Carlo aggregate interference (Engine A) into the Fixed Service receiver across deployment snapshots. Protection limit: long-term I/N = −10 dB.</p>
+      <h2>Fixed-Service I/N versus victim bearing</h2>
+      <p class="desc">80th-percentile I/N for the two mitigation combinations discussed in the paper, as the victim moves around the cluster at the selected distance, with the dish aimed at the cluster and the other settings as selected. Recomputed on request.</p>
+      <canvas id="bearChart" height="260"></canvas>
+      <div class="legend"><span><i class="swatch" style="background:var(--amber)"></i>60 MHz clearance + beam avoidance</span><span><i class="swatch" style="background:var(--cyan)"></i>120 MHz clearance + beam avoidance</span><span><i class="swatch" style="background:var(--red)"></i>criterion −10 dB</span></div>
+      <div class="btnrow" style="max-width:340px"><button class="btn" id="bearBtn">Run bearing sweep</button></div>
+      <div class="hint mono" id="bearNote" style="font-size:12px;color:var(--ink-faint);margin-top:6px"></div>
+    </div>
+    <div class="panel-block">
+      <h2>Aggregate I/N distribution into the Fixed Service</h2>
+      <p class="desc">Monte Carlo aggregate interference (Engine A) into the Fixed-Service receiver across the snapshots, for the current settings. Study criterion: I/N = −10 dB, not exceeded for more than 20% of the time.</p>
       <canvas id="inChart" height="240"></canvas>
-      <div class="legend"><span><i class="swatch" style="background:var(--amber)"></i>I/N per snapshot</span><span><i class="swatch" style="background:var(--red)"></i>limit −10 dB</span><span><i class="swatch" style="background:#e8ebf0"></i>I/N @ 20%</span></div>
+      <div class="legend"><span><i class="swatch" style="background:var(--amber)"></i>I/N per snapshot</span><span><i class="swatch" style="background:var(--red)"></i>criterion −10 dB</span><span><i class="swatch" style="background:#e8ebf0"></i>80th percentile</span></div>
     </div>
     <div class="panel-block">
       <h2>Aggregate I/N vs network size</h2>
-      <p class="desc">How the aggregate interference into each incumbent grows as the deployment scales from 1 to 4 rings (7 to 61 sites). The Fixed Service exceeds its limit at every cluster size evaluated; the satellite stays far below throughout.</p>
+      <p class="desc">Fixed Service (current placement and mitigations) and FSS satellite I/N as the deployment grows from 7 to 61 sites. The satellite result covers this cluster and one satellite geometry only, not a national footprint.</p>
       <canvas id="scaleChart" height="280"></canvas>
-      <div class="legend"><span><i class="swatch" style="background:var(--cyan)"></i>Fixed Service (I/N @20%)</span><span><i class="swatch" style="background:var(--amber)"></i>FSS satellite (I/N @20%)</span><span><i class="swatch" style="background:var(--red)"></i>protection limits</span></div>
+      <div class="legend"><span><i class="swatch" style="background:var(--cyan)"></i>Fixed Service</span><span><i class="swatch" style="background:var(--amber)"></i>FSS satellite</span><span><i class="swatch" style="background:var(--red)"></i>criteria</span></div>
     </div>
     <div class="panel-block">
       <h2>Mitigation stacking: Fixed Service</h2>
-      <p class="desc">Fixed Service I/N as mitigations are stacked, as in the paper: unmitigated, 60 MHz clearance, plus beam avoidance, 120 MHz clearance with avoidance, plus a 10 dB power reduction. AFC acts through the assigned clearance, not as a separate gain. Bars below the dashed line meet the −10 dB criterion.</p>
+      <p class="desc">Fixed-Service I/N for the paper's mitigation steps, at the current distance, bearing, dish pointing and clutter setting: co-channel, 60 MHz edge clearance, plus beam avoidance, 120 MHz clearance with avoidance, plus a 10 dB EIRP reduction.</p>
       <canvas id="stackChart" height="280"></canvas>
-      <div class="legend"><span><i class="swatch" style="background:var(--green)"></i>passes limit</span><span><i class="swatch" style="background:var(--red)"></i>fails limit</span><span><i class="swatch" style="background:#e8ebf0"></i>limit −10 dB</span></div>
+      <div class="legend"><span><i class="swatch" style="background:var(--green)"></i>meets criterion</span><span><i class="swatch" style="background:var(--red)"></i>exceeds criterion</span><span><i class="swatch" style="background:#e8ebf0"></i>criterion −10 dB</span></div>
     </div>
     <div class="panel-block">
-      <h2>Array beam pattern (M.2101)</h2>
-      <p class="desc">Composite array gain versus azimuth for the selected array, following the exact ITU-R M.2101 pattern, sidelobes included. Larger arrays give higher peak gain, the basis for beamforming-based interference avoidance.</p>
-      <canvas id="beamChart" height="260"></canvas>
-      <div class="legend"><span><i class="swatch" style="background:var(--amber)"></i>selected array</span><span><i class="swatch" style="background:var(--ink-faint)"></i>64-TRX reference</span></div>
+      <h2>Resolution 220 (WRC-23) expected EIRP, illustrative</h2>
+      <p class="desc">Expected EIRP spectral density per elevation range, averaged over horizontal angles, vertical angles and beams spread over the steering range, using the M.2101 pattern of the selected array, zero mechanical tilt and the current EIRP and bandwidth. Resolution 220 also requires compliance for every mechanical tilt and declared equipment configuration; this check says nothing about deployed equipment.</p>
+      <div class="tablewrap"><table id="resTable"></table></div>
     </div>
     <div class="panel-block">
       <h2>Mitigation trade space</h2>
-      <p class="desc">Interference reduction from each technique for the current configuration, with its standardisation status. The factors use different reference baselines and are not additive.</p>
+      <p class="desc">Effect of each technique for the current configuration, computed from matched runs where Monte Carlo is involved. The values use different baselines and are not additive.</p>
       <div class="mit-grid" id="mitGrid"></div>
+    </div>
+    <div class="panel-block">
+      <h2>Array beam pattern (M.2101)</h2>
+      <p class="desc">Composite array gain versus azimuth for the selected array, sidelobes included, against the 64-TRX reference.</p>
+      <canvas id="beamChart" height="260"></canvas>
+      <div class="legend"><span><i class="swatch" style="background:var(--amber)"></i>selected array</span><span><i class="swatch" style="background:#6b7584"></i>64-TRX reference</span></div>
     </div>
   </main>
 </div>
 <footer>
-  <strong>u6sim v1.0</strong>: interactive implementation of the framework in “Interference and Coexistence in the Upper 6 GHz Band” (IEEE OJ-COMS). Same models, constants and random-number generator as the accompanying Python notebooks (numpy PCG64, seed 42, 400 snapshots), so the reference case reproduces the published values.
-  <span class="prov">Models: ITU-R P.452-16 (smooth earth, 20% time, Dubai radio climate) · P.2108 · P.2109 · P.1238 · M.2101 composite pattern (exact) · F.1245 | Criteria: IMT I/N −6 dB · GSO FSS −10.5 dB/20% · FS −10 dB/20%.</span><br>
-  <span class="flag">Note:</span> deployment values (ISD, EIRP, FS geometry) are editable placeholders; replace with operator planning data for regulator-facing runs. The Fixed-Service margins rest on the P.2108 clutter loss at each base station; without it no evaluated mitigation protects a co-channel link aimed at the cluster.
+  <strong>u6sim v1.1</strong>: browser implementation of the framework in A. Elnashar, M. A. El-saidny and S. Muhaidat, “Interference and Coexistence in the Upper 6 GHz Band: A Practical Framework for 5G-Advanced and 6G Giga-MIMO Deployment,” IEEE Open Journal of the Communications Society, 2026. It uses the same models, constants and random-number generator as the v1.1 Python notebook (numpy PCG64), so both give the same results for the same inputs.<br>
+  <span class="prov">Models: 3GPP TR 38.901 UMa NLOS (floored at free space) · ITU-R P.452-16 (smooth earth, 20% time, Dubai climate) · P.2108-1 §3.2 · P.2109 · P.1238 · M.2101 composite pattern · F.1245-3 · bandwidth-integrated ACIR coupling · Resolution 220 (WRC-23) mask. Criteria: IMT I/N −6 dB · GSO FSS −10.5 dB / 20% · FS −10 dB / 20% (study criteria).</span><br>
+  <span class="flag">Note:</span> deployment values (ISD, EIRP, Fixed-Service geometry) are representative placeholders; replace them with planning and incumbent data for any decision. Without clutter loss at the base stations, no evaluated mitigation protects a co-channel Fixed-Service link aimed at the cluster.
 </footer>
 <script>
 /* =====================================================================
-   u6sim: browser implementation of the models in the accompanying Python notebook
+   u6sim v1.1: browser implementation of the models in the v1.1 notebook
    ===================================================================== */
-const ARRAY_GAIN = {macro_64:5+10*Math.log10(64), macro_128:5+10*Math.log10(128), giga_256:5+10*Math.log10(256)};   // M.2101 peak gain, G_E,max + 10 log10(N), exact as in the notebook
-const ARRAY_NV   = {macro_64:[8,8], macro_128:[8,16], giga_256:[16,16]};
-const UE_GAIN = 17.04;
-// Wi-Fi airtime-loss constants, calibrated to the BT/Nokia Adastral Park U6 GHz trial (2025)
-const C_LOSS = 0.07, B_OV = 0.75, L_MAX = 0.973;
-const P_ED = -72, P_CCA = -62, L_CCA = 0.5;   // L_CCA: loss at P_CCA, fixed by the No-UE trial state
-// Random numbers: an exact port of numpy.random.default_rng (SeedSequence + PCG64),
-// so the app draws the same samples as the notebook and reproduces the paper (seed 42).
-// numpy.random.default_rng(seed): SeedSequence -> PCG64 (XSL-RR), uniform via next_double
+const VERSION='1.1.0';
+const U6_START=6425, U6_STOP=7125;
+const ARRAY_NV={macro_64:[8,8],macro_128:[8,16],giga_256:[16,16]};
+const PEAK={macro_64:5+10*Math.log10(64),macro_128:5+10*Math.log10(128),giga_256:5+10*Math.log10(256)};
+const CPE_GAIN=5+10*Math.log10(16);
+const TERMINALS={cpe_4x4:{label:'FWA CPE 4×4 array',gain:CPE_GAIN,body:0},handheld:{label:'Handheld',gain:-4,body:4}};
+const termGain=k=>TERMINALS[k].gain-TERMINALS[k].body;
+const NF={imt_ue:9,wifi:7,fs:4,fss:2};
+// Wi-Fi airtime model (v1.1 calibration)
+const WIFI_BASE={160:2300,80:1500,40:750,20:375};
+const UE_TX_DBM=26, AP_GAIN=6;
+const C_LOSS=0.077, B_OV=0.75, L_MAX=0.973, P_ED=-72, P_CCA=-62, L_CCA=0.5;
+const REF_C=7050, REF_BW=80;
+const FS={gain:42,height:30,nf:4,bw:28};
+const FSSP={satG:20,satLon:50,lat:25,lon:55};
+const LOAD=0.5, BS_TX=53, BS_H=25, CLUTTER_SEED=7, TDD_DL=0.75;
+const CLUTTER_SHARE={all_median:1,all_sampled:1,urban:0.65,suburban:0.15,none:0};
+
+// ---- inverse normal CDF (Wichura AS241), identical to the notebook ----
+function normPpf(p){
+  const q=p-0.5; let r,num,den,x;
+  if(Math.abs(q)<=0.425){
+    r=0.180625-q*q;
+    num=(((((((2.5090809287301226727e+3*r+3.3430575583588128105e+4)*r+6.7265770927008700853e+4)*r
+      +4.5921953931549871457e+4)*r+1.3731693765509461125e+4)*r+1.9715909503065514427e+3)*r
+      +1.3314166789178437745e+2)*r+3.3871328727963666080e+0)*q;
+    den=(((((((5.2264952788528545610e+3*r+2.8729085735721942674e+4)*r+3.9307895800092710610e+4)*r
+      +2.1213794301586595867e+4)*r+5.3941960214247511077e+3)*r+6.8718700749205790830e+2)*r
+      +4.2313330701600911252e+1)*r+1.0);
+    return num/den;
+  }
+  r=q<=0?p:1-p; r=Math.sqrt(-Math.log(r));
+  if(r<=5){ r-=1.6;
+    num=(((((((7.7454501427834140764e-4*r+2.2723844989269184583e-2)*r+2.4178072517745061177e-1)*r
+      +1.2704582524523683826e+0)*r+3.6478483247632045978e+0)*r+5.7694972214606914055e+0)*r
+      +4.6303378461565452959e+0)*r+1.4234371107496835773e+0);
+    den=(((((((1.0507500716444168432e-9*r+5.4759380849953449460e-4)*r+1.5198666563616457197e-2)*r
+      +1.4810397642748007459e-1)*r+6.8976733498510000455e-1)*r+1.6763848301838038494e+0)*r
+      +2.0531916266377588219e+0)*r+1.0);
+  } else { r-=5;
+    num=(((((((2.0103343992922881327e-7*r+2.7115555687434875782e-5)*r+1.2426609473880784386e-3)*r
+      +2.6532189526576123093e-2)*r+2.9656057182850489123e-1)*r+1.7848265399172913358e+0)*r
+      +5.4637849111641143699e+0)*r+6.6579046435011037772e+0);
+    den=(((((((2.0442631033899397856e-15*r+1.4215117583164458887e-7)*r+1.8463183175100546818e-5)*r
+      +7.8686913114561325910e-4)*r+1.4875361290850614853e-2)*r+1.3692988092273580531e-1)*r
+      +5.9983220655588793769e-1)*r+1.0);
+  }
+  x=num/den; return q<0?-x:x;
+}
+// ---- numpy.random.default_rng(seed): SeedSequence -> PCG64, uniform via next_double ----
 function numpyRng(seed){
   const M32=0xffffffffn, M64=(1n<<64n)-1n, M128=(1n<<128n)-1n;
   const INIT_A=0x43b0d7e5n, MULT_A=0x931e8875n, INIT_B=0x8b51f9ddn, MULT_B=0x58f38dedn;
@@ -246,62 +335,45 @@ function numpyRng(seed){
     return ((x>>r)|(x<<((64n-r)&63n)))&M64; };
   return ()=>Number(next64()>>11n)*(1/9007199254740992);
 }
-let rnd=numpyRng(42);
-const N_SNAP=400;   // snapshots per Monte Carlo evaluation, as in the paper
-// ITU-R P.452-16 basic transmission loss, smooth earth, p = 20 %, Dubai radio climate (25.2 N, 55.3 E),
-// h_t = 25 m, h_r = 30 m, 6.625 GHz (tabulated with pycraf 2.1.0; same table as the notebook)
-const P452_D_KM=[0.25,0.2734,0.299,0.327,0.3576,0.3911,0.4277,0.4677,0.5115,0.5593,0.6117,0.6689,0.7315,0.8,0.8749,0.9568,1.0464,1.1443,1.2514,1.3685,1.4966,1.6367,1.7899,1.9574,2,2.1406,2.341,2.5601,2.7998,3.0618,3.3484,3.6618,4.0046,4.3794,4.7893,5,5.2376,5.7278,6.264,6.8503,7.4914,8.1926,8.9595,9.7981,10,10.7152,11.7181,12.815,14.0144,15.3262,16.7607,18.3295,20,20.0452,21.9214,23.9733,26.2172,28.6711,31.3547,34.2895,37.499,40,41.0089,44.8474,49.0451,53.6357,58.656,64.1462,70.1503,76.7164,80,83.8971,91.7499,100.338,109.729,120];
-const P452_LB=[96.859,97.633,98.408,99.182,99.956,100.730,101.503,102.275,103.048,103.818,104.590,105.361,106.131,106.901,107.670,108.439,109.207,109.974,110.740,111.505,112.269,113.033,113.795,114.556,114.739,115.316,116.075,116.832,117.589,118.343,119.097,119.849,120.600,121.349,122.097,122.457,122.844,123.590,124.335,125.079,125.822,126.565,127.308,128.052,128.221,128.795,129.540,130.287,131.035,131.786,132.539,133.296,134.037,134.056,134.821,135.590,136.364,137.143,137.927,138.716,139.511,141.695,142.710,146.456,150.187,154.250,160.174,166.815,174.376,182.629,185.945,187.260,189.728,192.208,194.639,196.999];
-function p452(dm){const dk=Math.max(dm/1000,P452_D_KM[0]), x=Math.log10(dk);
-  for(let i=1;i<P452_D_KM.length;i++){const x1=Math.log10(P452_D_KM[i]);
-    if(x<=x1){const x0=Math.log10(P452_D_KM[i-1]);return P452_LB[i-1]+(P452_LB[i]-P452_LB[i-1])*(x-x0)/(x1-x0);}}
-  return P452_LB[P452_LB.length-1];}
-const UE_TX_DBM = 26;   // 3GPP power class 2
-const MOBILE_C = 7050, MOBILE_BW = 80;   // trial carrier used to calibrate the Wi-Fi model (BT/Nokia)
-// ---- Uplink coexistence parameters ----
-// Aggressor devices for UL-mode IMT<->Wi-Fi study.
-const UL_DEVICES = {
-  handheld: { eirp: 26, gain: UE_GAIN, height: 1.5, regime_to_ap: 'o2i' }, // indoor handheld, 3GPP PC2 (26 dBm)
-  cpe_rooftop: { eirp: 31, gain: 23, height: 20, regime_to_ap: 'o2i' }     // outdoor rooftop CPE, FCC SP client (~31 dBm)
-};
-const WIFI_AP = { tx: 23, gain: 6, height: 2, bw: 160 }; // indoor Wi-Fi AP baseline
-
 // ---- propagation ----
-const fspl=(d,f)=>32.44+20*Math.log10(d/1000)+20*Math.log10(f);
-const abgNlos=(d,f)=>13.54+39.08*Math.log10(d)+20*Math.log10(f/1000);
-const bel=b=>b==='thermally_efficient'?32.6:17.0;
-const p1238=(d,f)=>20*Math.log10(f)+28*Math.log10(Math.max(d,1))-28;
-const clutter=d=>d<250?0:31.4;
-function totalPL(f,d,regime,building){
-  if(regime==='o2o') return abgNlos(d,f);
-  if(regime==='o2i') return abgNlos(d,f)+bel(building);
+const log10=Math.log10;
+const fspl=(d,f)=>32.44+20*log10(d/1000)+20*log10(f);
+const umaNlos=(d,f)=>13.54+39.08*log10(d)+20*log10(f/1000);
+const outdoorLoss=(d,f)=>Math.max(umaNlos(d,f),fspl(d,f));
+const P2109={traditional:[12.64,3.72,0.96,9.6,2.0,9.1,-3.0,4.5,-2.0],thermally_efficient:[28.19,-3.00,8.48,13.5,3.8,27.8,-2.9,9.4,-2.1]};
+function p2109(f,b,prob=0.5,elev=0){
+  const [r,s,t,u,v,w,x,y,z]=P2109[b], lf=log10(f/1000);
+  const mu1=r+s*lf+t*lf*lf+0.212*Math.abs(elev), mu2=w+x*lf, s1=u+v*lf, s2=y+z*lf, F=normPpf(prob);
+  const A=F*s1+mu1, B=F*s2+mu2, C=-3;
+  return 10*log10(Math.pow(10,0.1*A)+Math.pow(10,0.1*B)+Math.pow(10,0.1*C));
+}
+const p1238=(d,f)=>20*log10(f)+28*log10(Math.max(d,1))-28;
+function p2108tt(fg,dk,p){
+  const sl=4, ss=6;
+  const Ll=-2*log10(Math.pow(10,-5*log10(fg)-12.5)+Math.pow(10,-16.5));
+  const Ls=32.98+23.9*log10(dk)+3*log10(fg);
+  const a=Math.pow(10,-0.2*Ll), b=Math.pow(10,-0.2*Ls);
+  const scb=Math.sqrt((sl*sl*a+ss*ss*b)/(a+b));
+  return -5*log10(a+b)-scb*normPpf(1-p/100);
+}
+function p2108(d,f,p=50){ if(d<250) return 0; const fg=f/1000; return Math.min(p2108tt(fg,2,p),p2108tt(fg,d/1000,p)); }
+// ITU-R P.452-16 basic transmission loss, smooth earth, 20 %, Dubai climate, h_t 25 m, h_r 30 m, 6.625 GHz (pycraf 2.1.0)
+const P452_D_KM=[0.25,0.2734,0.299,0.327,0.3576,0.3911,0.4277,0.4677,0.5115,0.5593,0.6117,0.6689,0.7315,0.8,0.8749,0.9568,1.0464,1.1443,1.2514,1.3685,1.4966,1.6367,1.7899,1.9574,2,2.1406,2.341,2.5601,2.7998,3.0618,3.3484,3.6618,4.0046,4.3794,4.7893,5,5.2376,5.7278,6.264,6.8503,7.4914,8.1926,8.9595,9.7981,10,10.7152,11.7181,12.815,14.0144,15.3262,16.7607,18.3295,20,20.0452,21.9214,23.9733,26.2172,28.6711,31.3547,34.2895,37.499,40,41.0089,44.8474,49.0451,53.6357,58.656,64.1462,70.1503,76.7164,80,83.8971,91.7499,100.3377,109.7293,120];
+const P452_LB=[96.859,97.633,98.408,99.182,99.956,100.73,101.503,102.275,103.048,103.818,104.59,105.361,106.131,106.901,107.67,108.439,109.207,109.974,110.74,111.505,112.269,113.033,113.795,114.556,114.739,115.316,116.075,116.832,117.589,118.343,119.097,119.849,120.6,121.349,122.097,122.457,122.844,123.59,124.335,125.079,125.822,126.565,127.308,128.052,128.221,128.795,129.54,130.287,131.035,131.786,132.539,133.296,134.037,134.056,134.821,135.59,136.364,137.143,137.927,138.716,139.511,141.695,142.71,146.456,150.187,154.25,160.174,166.815,174.376,182.629,185.945,187.26,189.728,192.208,194.639,196.999];
+function p452(dm){const dk=Math.max(dm/1000,P452_D_KM[0]), x=log10(dk);
+  for(let i=1;i<P452_D_KM.length;i++){const x1=log10(P452_D_KM[i]);
+    if(x<=x1){const x0=log10(P452_D_KM[i-1]);return P452_LB[i-1]+(P452_LB[i]-P452_LB[i-1])*(x-x0)/(x1-x0);}}
+  return P452_LB[P452_LB.length-1];}
+function totalPL(f,d,regime,building,clutterDb){
+  if(regime==='o2o') return outdoorLoss(d,f);
+  if(regime==='o2i') return outdoorLoss(d,f)+p2109(f,building);
   if(regime==='i2i') return p1238(d,f);
-  if(regime==='fs')  return p452(d)+clutter(d);   // P.452 + P.2108 clutter
+  if(regime==='fs')  return p452(d)+(clutterDb===undefined?p2108(d,f):clutterDb);
   return fspl(d,f);
 }
-// ---- ACIR / coupling ----
-function overlap(f1,b1,f2,b2){
-  const lo1=f1-b1/2,hi1=f1+b1/2,lo2=f2-b2/2,hi2=f2+b2/2;
-  return Math.max(0,Math.min(hi1,hi2)-Math.max(lo1,lo2))/b2;
-}
-function acir(sep,bw,aclr=30,acs=33,roll=20){
-  if(sep<=0) return 0;
-  const x=roll*(sep/Math.max(bw,1));
-  const a=Math.pow(10,(aclr+x)/10), s=Math.pow(10,(acs+x)/10);
-  return -10*Math.log10(1/(1/a+1/s));
-}
-function coupling(fi,bi,fv,bv){
-  const ov=overlap(fi,bi,fv,bv);
-  let sep=Math.abs(fi-fv)-(bi+bv)/2; sep=Math.max(sep,0);
-  const ac=acir(sep,bi);
-  const pt=ov+(1-ov)*Math.pow(10,ac/10);
-  return pt<=0?120:-10*Math.log10(pt);
-}
-// ---- M.2101 composite gain (exact) ----
+// ---- antennas ----
 function arrayGain(name,az,el=0,azi=0,eli=0){
-  // ITU-R M.2101-0 Sec. 5.2 composite pattern, exact: element pattern referred to the
-  // array boresight, full array factor (sidelobes, beam broadening, steered-gain loss).
-  // az, el: direction relative to the array boresight; azi, eli: electrical steering.
+  // ITU-R M.2101 Sec. 5.2 composite pattern, exact (as the notebook; validated against pycraf)
   const [nh,nv]=ARRAY_NV[name], D=Math.PI/180;
   const aeh=-Math.min(12*Math.pow(az/65,2),30), aev=-Math.min(12*Math.pow(el/65,2),30);
   const ge=5-Math.min(-(aeh+aev),30);
@@ -311,602 +383,442 @@ function arrayGain(name,az,el=0,azi=0,eli=0){
   for(let n=0;n<nv;n++){vr+=Math.cos(n*av);vi+=Math.sin(n*av);}
   for(let m=0;m<nh;m++){hr+=Math.cos(m*ah);hi+=Math.sin(m*ah);}
   const af=(vr*vr+vi*vi)*(hr*hr+hi*hi)/(nh*nv);
-  return ge+10*Math.log10(Math.max(af,1e-30));
+  return ge+10*log10(Math.max(af,1e-30));
 }
 function fsDish(phi,peak=42){
-  // ITU-R F.1245 average pattern (identical to the notebook)
-  phi=Math.abs(phi); const DL=Math.sqrt(Math.pow(10,peak/10)/0.6)/Math.PI, G1=2+15*Math.log10(DL);
-  if(phi<1) return peak-2.5e-3*Math.pow(DL*phi,2);
-  if(phi<48) return Math.max(phi<5?G1:29-25*Math.log10(Math.max(phi,1)),-13);
-  return -13;
+  // ITU-R F.1245-3 average pattern, both D/lambda branches (identical to the notebook)
+  phi=Math.abs(phi); const DL=Math.pow(10,(peak-7.7)/20), G1=2+15*log10(DL);
+  const phim=20/DL*Math.sqrt(Math.max(peak-G1,0));
+  if(phi<phim) return peak-2.5e-3*Math.pow(DL*phi,2);
+  if(DL>100){ const phir=12.02*Math.pow(DL,-0.6);
+    if(phi<Math.max(phim,phir)) return G1; if(phi<48) return 29-25*log10(phi); return -13; }
+  if(phi<48) return 39-5*log10(DL)-25*log10(phi);
+  return -3-5*log10(DL);
 }
-function airtimeLoss(agg,ov,ed=P_ED,cca=P_CCA){
-  // Paper Eq. (9): ramp from 0 at P_ED to L_CCA at P_CCA, then the saturating branch,
-  // held at or above L_CCA and capped at L_MAX.
-  if(agg<ed||ov===0) return 0;
-  if(agg<=cca) return cca>ed?L_CCA*(agg-ed)/(cca-ed):L_CCA;
-  return Math.min(Math.max(1-Math.exp(-C_LOSS*(agg-cca))*(1-B_OV*ov),L_CCA),L_MAX);
-}
-function pct80(arr){const a=[...arr].sort((x,y)=>x-y), k=0.8*(a.length-1), i=Math.floor(k);
-  return i+1<a.length?a[i]+(a[i+1]-a[i])*(k-i):a[i];}
-// ---- link / noise ----
-const KT_DBM_HZ=10*Math.log10(1.380649e-23*290*1e3);   // -173.975 dBm/Hz (k T0, T0 = 290 K), as in the notebook
-const noise=(bw,nf)=>KT_DBM_HZ+10*Math.log10(bw*1e6)+nf;
-const lin=d=>Math.pow(10,d/10);
-const toDb=m=>10*Math.log10(Math.max(m,1e-300));
-function aggDbm(list){let s=0;list.forEach(x=>s+=lin(x));return s>0?toDb(s):-300;}
-function SE(sinr,a=0.6,smin=-10,smax=30,semax=7.4){
-  if(sinr<smin) return 0;
-  const c=Math.max(smin,Math.min(smax,sinr));
-  return Math.min(a*Math.log2(1+Math.pow(10,c/10)),semax);
-}
-const tput=(sinr,bw,layers=4,dl=0.75)=>SE(sinr)*bw*layers*dl;
-
-// ---- state ----
-const S={center:6625,bw:200,array:'giga_256',eirp:75,isd:400,rings:3,
-  building:'thermally_efficient',wifiC:7055,wifiBw:160,
-  guard:0,sep:5,pwr:0,beam:0,afc:0,
-  ulDev:'handheld',ulDist:20,ulAfc:0};
-
-// ---- Engine B: Wi-Fi victim throughput ----
-// The mobile interferer is the actual operator block (S.center/S.bw), so moving
-// the block in the UI drives the Wi-Fi result. The fixed reference carrier
-// (MOBILE_C/MOBILE_BW = 7050/80) is retained only for the validation matrix row.
-function wifiVictim(state,wc,wbw,refCarrier){
-  const base = wbw>=160?2300:1500;
-  // interferer carrier: the operator block by default; the fixed ref for the
-  // validation row (refCarrier=true)
-  let mC = refCarrier ? MOBILE_C : S.center;
-  let mBw = refCarrier ? MOBILE_BW : S.bw;
-  if(S.guard>0) mC = wc>mC ? mC-S.guard : mC+S.guard;
-  const rej = coupling(mC,mBw,wc,wbw);
-  let interf=[];
-  if(['No_UE','Idle_UE','Active_UE'].includes(state)){
-    const eirp=Math.min(53+ARRAY_GAIN[S.array],S.eirp)-S.pwr;
-    const pl=totalPL(mC,100,'o2i',S.building);
-    const duty={No_UE:-6,Idle_UE:-3,Active_UE:0}[state];
-    interf.push(eirp-pl+6-rej+duty);
-  }
-  if(state==='Active_UE'){
-    const pl=totalPL(mC,1,'i2i');
-    interf.push(UE_TX_DBM-pl+6-rej);
-  }
-  const agg=interf.length?aggDbm(interf):-300;
-  const ovEff=overlap(mC,mBw,wc,wbw);
-  return base*(1-airtimeLoss(agg,ovEff));
-}
-
-// ---- Engine B (uplink mode): IMT uplink <-> Wi-Fi coexistence ----
-// Terminal-level coupling between an uplink device and a Wi-Fi access point.
-// Two directions are evaluated at a separation distance `dist` (m):
-//   (1) IMT UL device (handheld or rooftop CPE) -> indoor Wi-Fi AP receiver
-//   (2) Wi-Fi AP -> IMT UL device receiver (CPE/handheld)
-// afc=true lets AFC steer the IMT device to a non-overlapping channel where the
-// victim is registered/detected; if no clear channel, it caps EIRP by location.
-// Returns per-direction levels and whether each meets its criterion (paper Section VI.B).
-function ulCoexistence(deviceKey, wc, wbw, dist, afc){
-  const dev = UL_DEVICES[deviceKey];
-  const wifiBase = wbw>=160 ? 2300 : 1500;
-  // Without AFC the IMT uplink carrier is placed on the Wi-Fi channel (co-channel).
-  // With AFC it is moved to a clear channel.
-  let mC = wc, mBw = Math.min(S.bw, wbw);
-  // AFC action: if enabled and an adjacent non-overlapping assignment exists,
-  // move the IMT carrier clear of the Wi-Fi channel with a small guard so the
-  // assignment gives finite rejection rather than an edge-adjacent channel.
-  let afcShift = 0;
-  const rawOverlap = overlap(mC,mBw,wc,wbw);
-  if(afc && rawOverlap>0){
-    const guard = 20; // MHz guard beyond edge-adjacency for a clean assignment
-    const need = (mBw+wbw)/2 + guard - Math.abs(mC-wc);
-    // try shifting up first, else down, to stay inside the band
-    for(const target of [wc+((mBw+wbw)/2+guard), wc-((mBw+wbw)/2+guard)]){
-      if(target>=6425+mBw/2 && target<=7125-mBw/2){ mC=target; afcShift=(mBw+wbw)/2+guard; break; }
-    }
-  }
-  const rej = coupling(mC,mBw,wc,wbw);           // frequency rejection (dB)
-  const ovEff = overlap(mC,mBw,wc,wbw);
-
-  // ---- Direction 1: IMT UL device -> Wi-Fi AP ----
-  // AFC standard-power EIRP cap when co-channel and victim present (location-based).
-  let devEirp = dev.eirp;
-  if(afc && ovEff>0) devEirp = Math.min(devEirp, 21);  // SP AFC power cap, dBm
-  const plToAp = totalPL(mC, Math.max(dist,1), dev.regime_to_ap, S.building);
-  const rxAtAp = devEirp + WIFI_AP.gain - plToAp - rej;   // dBm at Wi-Fi AP
-  const wifiNoise = -174 + 10*Math.log10(wbw*1e6) + 7;    // Wi-Fi Rx noise, dBm
-  const inAtAp = rxAtAp - wifiNoise;                        // I/N at Wi-Fi AP
-  // Wi-Fi throughput vs CSMA thresholds
-  let wifiTp; { const lost=airtimeLoss(rxAtAp,ovEff);
-    wifiTp=wifiBase*(1-lost); }
-
-  // ---- Direction 2: Wi-Fi AP -> IMT UL device receiver ----
-  const plToDev = totalPL(mC, Math.max(dist,1), dev.regime_to_ap, S.building);
-  const rxAtDev = WIFI_AP.tx + dev.gain - plToDev - rej;   // dBm at IMT device
-  const devNoise = -174 + 10*Math.log10(mBw*1e6) + 9;      // IMT Rx noise, dBm
-  const inAtDev = rxAtDev - devNoise;                       // I/N at IMT UL Rx
-
-  // ---- Criteria (paper Section VI.B): device->AP interference below the -72 dBm
-  // transition (P_ED), so no airtime loss; AP->device I/N below the -6 dB IMT criterion.
-  const wifiOk = rxAtAp < P_ED;
-  const imtOk  = inAtDev < -6;
-  return { device:deviceKey, dist, afcShift, ovEff, rxAtAp,
-           inAtAp, wifiTp, wifiLoss:(1-wifiTp/wifiBase)*100, wifiOk,
-           inAtDev, imtOk, fair: wifiOk && imtOk };
-}
-
-// ---- Engine A: aggregate I/N into FS (Monte Carlo, 400 snapshots) ----
-// hex grid of site coordinates (mirrors the notebook geometry)
+// ---- geometry ----
 function hexSites(nRings,isd){
   const sites=[], dx=isd, dy=isd*Math.sqrt(3)/2;
-  for(let q=-nRings;q<=nRings;q++)
-    for(let r=-nRings;r<=nRings;r++)
-      if((Math.abs(q)+Math.abs(r)+Math.abs(q+r))/2<=nRings)
-        sites.push({x:dx*(q+r/2), y:dy*r, z:25});
+  for(let q=-nRings;q<=nRings;q++) for(let r=-nRings;r<=nRings;r++)
+    if((Math.abs(q)+Math.abs(r)+Math.abs(q+r))/2<=nRings) sites.push({x:dx*(q+r/2), y:dy*r, z:BS_H});
   return sites;
 }
-function azDeg(ax,ay,bx,by){return ((Math.atan2(bx-ax,by-ay)*180/Math.PI)%360+360)%360;}
-function angDiff(a,b){let d=Math.abs((a-b)%360);return Math.min(d,360-d);}
+const azDeg=(ax,ay,bx,by)=>(((Math.atan2(bx-ax,by-ay)*180/Math.PI)%360)+360)%360;
+const angDiff=(a,b)=>{const d=Math.abs((a-b)%360); return Math.min(d,360-d);};
+const wrap180=a=>((((a+180)%360)+360)%360)-180;
+function gsoElev(lat,satLon,siteLon){const D=Math.PI/180, la=lat*D, dl=(satLon-siteLon)*D;
+  const g=Math.acos(Math.cos(la)*Math.cos(dl)), Re=6378.137, Rs=42164.0;
+  return Math.atan2(Math.cos(g)-Re/Rs,Math.sin(g))/D;}
+function gsoAz(lat,satLon,siteLon){const D=Math.PI/180, la=lat*D, lo=siteLon*D, ls=satLon*D, Re=6378.137, Rs=42164.0;
+  const s=[Re*Math.cos(la)*Math.cos(lo),Re*Math.cos(la)*Math.sin(lo),Re*Math.sin(la)];
+  const v=[Rs*Math.cos(ls)-s[0],Rs*Math.sin(ls)-s[1],-s[2]];
+  const e=[-Math.sin(lo),Math.cos(lo),0], n=[-Math.sin(la)*Math.cos(lo),-Math.sin(la)*Math.sin(lo),Math.cos(la)];
+  const ve=v[0]*e[0]+v[1]*e[1]+v[2]*e[2], vn=v[0]*n[0]+v[1]*n[1]+v[2]*n[2];
+  return (((Math.atan2(ve,vn)/D)%360)+360)%360;}
+function gsoSlant(el,Re=6371000){const e=el*Math.PI/180, Rs=Re+35786000;
+  return -Re*Math.sin(e)+Math.sqrt(Math.pow(Re*Math.sin(e),2)+Rs*Rs-Re*Re);}
+const slantPL=(f,sl,el)=>fspl(sl,f)+0.04/Math.sin(Math.max(el,1)*Math.PI/180);
+// ---- link / noise ----
+const KT_DBM_HZ=10*log10(1.380649e-23*290*1e3);
+const noise=(bw,nf)=>KT_DBM_HZ+10*log10(bw*1e6)+nf;
+const lin=d=>Math.pow(10,d/10);
+const toDb=m=>10*log10(Math.max(m,1e-300));
+function aggDbm(list){let s=0;for(const x of list) s+=lin(x);return list.length?toDb(s):-300;}
+function SE(snr,a=0.6,smin=-10,smax=30,semax=7.4){ if(snr<smin) return 0; const c=Math.max(smin,Math.min(smax,snr)); return Math.min(a*Math.log2(1+Math.pow(10,c/10)),semax); }
+const tput=(snr,bw)=>SE(snr)*bw*4*TDD_DL;
+function pct80(arr){const a=[...arr].sort((x,y)=>x-y), k=0.8*(a.length-1), i=Math.floor(k);
+  return i+1<a.length?a[i]+(a[i+1]-a[i])*(k-i):a[i];}
+// ---- spectral coupling and Wi-Fi raster ----
+function wifiChannel(ch,w){const i=(ch-1)/4|0, blk=Math.floor(i/(w/20)), lo=5945+w*blk; return {c:lo+w/2,lo,hi:lo+w};}
+const wifiPrimary=ch=>5950+5*ch;
+function validPrimaries(w){const out=[];for(let ch=1;ch<=233;ch+=4){if(wifiChannel(ch,w).hi<=U6_STOP) out.push(ch);}return out;}
+const overlapMHz=(f1,b1,f2,b2)=>Math.max(0,Math.min(f1+b1/2,f2+b2/2)-Math.max(f1-b1/2,f2-b2/2));
+const overlapFrac=(fi,bi,fv,bv)=>bv>0?overlapMHz(fi,bi,fv,bv)/bv:0;
+function acir(sep,bw,aclr=30,acs=33,roll=20){const x=roll*(Math.max(sep,0)/Math.max(bw,1));
+  const a=Math.pow(10,(aclr+x)/10), s=Math.pow(10,(acs+x)/10); return 10*log10(1/(1/a+1/s));}
+function coupling(fi,bi,fv,bv,aclr=30,acs=33,roll=20){
+  const fin=overlapMHz(fi,bi,fv,bv)/bi, sep=Math.max(Math.abs(fi-fv)-(bi+bv)/2,0);
+  const pt=fin+(1-fin)*Math.pow(10,-acir(sep,bi,aclr,acs,roll)/10); return -10*log10(pt);}
 
-function aggregateIN_FS(){
-  const sectors=3, load=0.5, snaps=N_SNAP; rnd=numpyRng(42);
-  const fsGain=42, fsBw=28, fsNf=4, fsDist=S.sep*1000, fsBearing=45;
-  const nDbm=noise(fsBw,fsNf);
-  const eirpPeak=Math.min(53+ARRAY_GAIN[S.array],S.eirp)-S.pwr;
-  // Co-channel: the victim channel lies inside the block, so only the fraction of
-  // the emitted power falling in the victim bandwidth is received. With a guard
-  // band the emissions are disjoint and ACIR governs instead.
-  const fsFreq=S.center+S.bw/2+S.guard+fsBw/2;
-  const rej=S.guard>0?coupling(S.center,S.bw,fsFreq,fsBw):0;
-  const bwTerm=S.guard>0?0:10*Math.log10(fsBw/S.bw);
-  const afcGain=0;   // AFC acts through the assigned clearance, no separate gain
-  const avoidDeg=S.beam?30:0;   // scheduler exclusion around the victim direction
-  // explicit geometry: build the site grid, place the FS relative to the cluster
-  const sites=hexSites(S.rings,S.isd);
-  const cx=sites.reduce((a,s)=>a+s.x,0)/sites.length;
-  const cy=sites.reduce((a,s)=>a+s.y,0)/sites.length;
-  const rad=fsBearing*Math.PI/180;
-  const fx=cx+fsDist*Math.sin(rad), fy=cy+fsDist*Math.cos(rad), fz=30;
-  const fsBoresight=azDeg(fx,fy,cx,cy);   // FS dish points at the cluster
+// ---- state ----
+const DEFAULTS={center:6625,bw:200,array:'giga_256',eirp:75,isd:400,rings:3,building:'thermally_efficient',terminal:'cpe_4x4',
+  wifiW:160,wifiCh:221,fsChan:'co',guard:0,sep:5,bearing:45,offset:0,clutter:'all_median',pwr:0,beam:0,
+  nsnap:400,seed:42,ulDev:'handheld',ulDist:20,ulCoord:0};
+const S=Object.assign({},DEFAULTS);
+const bsEirp=(array=S.array,pwr=S.pwr)=>Math.min(BS_TX+PEAK[array],S.eirp)-pwr;
+
+// ---- Engine B: Wi-Fi victim ----
+function ueCarrier(fm,bm,wc,ref){ if(ref) return [fm,bm]; const bu=Math.min(100,bm);
+  return wc>=fm?[fm+bm/2-bu/2,bu]:[fm-bm/2+bu/2,bu]; }
+function wifiAgg(state,fm,bm,wc,wb,pwr,building,ref){
   const out=[];
-  for(let s=0;s<snaps;s++){
-    let powers=[];
-    for(const site of sites){
-      for(let sec=0;sec<sectors;sec++){
-        if(rnd()>load) continue;
-        const sectorAz=sec*120;
-        // real geometry BS -> FS
-        const azV=azDeg(site.x,site.y,fx,fy);
-        const dH=Math.hypot(fx-site.x,fy-site.y);
-        const elV=Math.atan2(fz-site.z,Math.max(dH,1))*180/Math.PI;
-        // BS beam steers to its served UE (within sector, downtilt)
-        let beamAz=sectorAz+(rnd()*120-60);
-        if(avoidDeg>0){
-          for(let t=0;t<60;t++){
-            if(Math.abs(((azV-beamAz+540)%360)-180)>avoidDeg) break;
-            beamAz=sectorAz+(rnd()*120-60);
-          }
-        }
-        const beamEl=-(rnd()*12);
-        const aRel=((azV-sectorAz+540)%360)-180, aBeam=((beamAz-sectorAz+540)%360)-180;
-        const g=arrayGain(S.array,aRel,elV,aBeam,beamEl);   // array frame
-        const eirpT=eirpPeak-(ARRAY_GAIN[S.array]-g);
-        const d=Math.sqrt(dH*dH+(fz-site.z)**2);
-        const pl=totalPL(S.center,d,'fs');
-        // Dish off-axis angle is measured at the dish, so use the FS -> BS vector.
-        const fsOff=angDiff(azDeg(fx,fy,site.x,site.y),fsBoresight);
-        const fg=fsDish(fsOff,fsGain);
-        powers.push(eirpT-pl+fg+bwTerm-rej-afcGain);
-      }
-    }
-    const agg=powers.length?aggDbm(powers):-300;
-    out.push(agg-nDbm);
-  }
-  const pct=pct80(out); out.sort((a,b)=>a-b);
-  return {dist:out,pct,mean:out.reduce((a,b)=>a+b,0)/out.length,
-          limit:-10,passes:pct<=-10,margin:-10-pct,fsFreq};
+  if(state==='No_UE'||state==='Idle_UE'||state==='Active_UE'){
+    const pl=totalPL(fm,100,'o2i',building), duty={No_UE:-6,Idle_UE:-3,Active_UE:0}[state];
+    out.push(bsEirp(S.array,pwr)-pl+AP_GAIN-coupling(fm,bm,wc,wb)+duty);}
+  if(state==='Active_UE'){ const [fu,bu]=ueCarrier(fm,bm,wc,ref); out.push(UE_TX_DBM-totalPL(fu,1,'i2i')+AP_GAIN-coupling(fu,bu,wc,wb)); }
+  return out.length?aggDbm(out):-300;
 }
-// ---- FSS aggregate (scales with network) ----
-function aggregateIN_FSS(){
-  // Monte Carlo at the 80th percentile, as in the notebook (GSO at 60.2 deg, 36 508 km slant)
-  rnd=numpyRng(42);
-  const sites=hexSites(S.rings,S.isd), el=60.2289, slant=36508013.7, satG=20, load=0.5;
-  const eirpPeak=Math.min(53+ARRAY_GAIN[S.array],S.eirp)-S.pwr;
-  const pl=fspl(slant,S.center)+0.04/Math.sin(el*Math.PI/180), nDbm=noise(S.bw,2);
-  const out=[];
-  for(let n=0;n<N_SNAP;n++){
-    const p=[];
-    for(const site of sites){ for(let sec=0;sec<3;sec++){
-      if(rnd()>load) continue;
-      const sa=sec*120, beamAz=sa+(rnd()*120-60), beamEl=-(rnd()*12), satAz=sa+(rnd()*120-60);
-      const g=arrayGain(S.array,((satAz-sa+540)%360)-180,el,((beamAz-sa+540)%360)-180,beamEl);
-      p.push(eirpPeak-(ARRAY_GAIN[S.array]-g)-pl+satG);
-    }}
-    out.push((p.length?aggDbm(p):-300)-nDbm);
-  }
-  const inv=pct80(out);
-  return {pct:inv,limit:-10.5,passes:inv<=-10.5,margin:-10.5-inv};
+function airtimeLoss(agg,ov){
+  if(agg<P_ED) return 0;
+  if(agg<=P_CCA) return L_CCA*(agg-P_ED)/(P_CCA-P_ED);
+  return Math.min(Math.max(1-Math.exp(-C_LOSS*(agg-P_CCA))*(1-B_OV*ov),L_CCA),L_MAX);
 }
+function wifiVictim(state,ch,w,ref,pwr=S.pwr,building=S.building){
+  const fm=ref?REF_C:S.center, bm=ref?REF_BW:S.bw, wc=wifiChannel(ch,w).c;
+  const agg=wifiAgg(state,fm,bm,wc,w,pwr,building,ref), ov=overlapFrac(fm,bm,wc,w);
+  let tp=WIFI_BASE[w]*(1-airtimeLoss(agg,ov)), mode=w+' MHz';
+  if(ov>0 && overlapMHz(fm,bm,wifiPrimary(ch),20)===0){
+    let ww=w/2, sc=0;
+    while(ww>=20){ sc=wifiChannel(ch,ww).c; if(overlapMHz(fm,bm,sc,ww)===0) break; ww/=2; }
+    const a2=wifiAgg(state,fm,bm,sc,ww,pwr,building,ref), tp2=WIFI_BASE[ww]*(1-airtimeLoss(a2,0));
+    if(tp2>tp){ tp=tp2; mode='fallback '+ww+' MHz'; }
+  }
+  return {tp,ov,mode,agg};
+}
+// ---- Engine B: coverage and cell edge ----
+function coveragePoint(d,f,bw,array,pwr=S.pwr){
+  const snr=bsEirp(array,pwr)-totalPL(f,d,'o2i',S.building)+termGain(S.terminal)-noise(bw,NF.imt_ue);
+  return tput(snr,bw);
+}
+function cellEdgeSnr(){ const d=0.7*S.isd;
+  return bsEirp()-totalPL(S.center,d,'o2o')+termGain(S.terminal)-noise(S.bw,NF.imt_ue)-3; }
+// ---- Engine B: terminal-Wi-Fi coupling ----
+const UL_DEVICES={handheld:{label:'Handheld (18 dBm EIRP)',eirp:26+termGain('handheld'),rx:termGain('handheld')},
+                  cpe_rooftop:{label:'Rooftop CPE (31 dBm EIRP)',eirp:31,rx:23}};
+const AP_EIRP=23;
+function ulCoexistence(dev,ch,w,dist,coord){
+  const d=UL_DEVICES[dev], wc=wifiChannel(ch,w).c, mBw=Math.min(100,S.bw);
+  let mC=wc, shift=0;
+  if(coord){ const need=(mBw+w)/2+20;
+    for(const t of [wc+need,wc-need]){ if(t>=U6_START+mBw/2 && t<=U6_STOP-mBw/2){ mC=t; shift=need; break; } } }
+  const rej=coupling(mC,mBw,wc,w), ov=overlapFrac(mC,mBw,wc,w);
+  const pl=totalPL(mC,Math.max(dist,1),'o2i',S.building);
+  const rxAp=d.eirp+AP_GAIN-pl-rej, wifiLoss=airtimeLoss(rxAp,ov)*100;
+  const inDev=AP_EIRP+d.rx-pl-rej-noise(mBw,NF.imt_ue);
+  const wifiOk=rxAp<P_ED, imtOk=inDev<-6;
+  return {mC,shift,ov,rej,rxAp,wifiLoss,wifiOk,inDev,imtOk,both:wifiOk&&imtOk};
+}
+// ---- Engine A: Fixed Service ----
+function fsFreq(chan=S.fsChan,guard=S.guard){
+  if(chan==='co') return S.center;
+  const up=S.center+S.bw/2+guard+FS.bw/2;
+  return up+FS.bw/2<=U6_STOP?up:S.center-S.bw/2-guard-FS.bw/2;
+}
+function siteClutter(sites,fx,fy,mode,seed=CLUTTER_SEED){
+  const r=numpyRng(seed), share=CLUTTER_SHARE[mode], out=[];
+  for(const s of sites){ const ub=r(), ul=r();
+    if(mode==='none'||ub>=share){ out.push(0); continue; }
+    const d=Math.hypot(fx-s.x,fy-s.y), p=mode==='all_median'?50:Math.min(Math.max(100*ul,1e-6),100-1e-6);
+    out.push(p2108(d,S.center,p)); }
+  return out;
+}
+function mcFS(o={}){
+  const rings=o.rings??S.rings, nsnap=o.nsnap??S.nsnap, dist=(o.sep??S.sep)*1000, bearing=o.bearing??S.bearing;
+  const offset=o.offset??S.offset, chan=o.chan??S.fsChan, guard=o.guard??S.guard, pwr=o.pwr??S.pwr;
+  const beam=o.beam??S.beam, clutter=o.clutter??S.clutter, seed=o.seed??S.seed, array=o.array??S.array;
+  const eirpPk=bsEirp(array,pwr), peak=PEAK[array], nDbm=noise(FS.bw,FS.nf);
+  const fsf=fsFreq(chan,guard), rej=coupling(S.center,S.bw,fsf,FS.bw);
+  const sites=hexSites(rings,S.isd);
+  const cx=sites.reduce((a,s)=>a+s.x,0)/sites.length, cy=sites.reduce((a,s)=>a+s.y,0)/sites.length;
+  const rad=bearing*Math.PI/180, fx=cx+dist*Math.sin(rad), fy=cy+dist*Math.cos(rad), fz=FS.height;
+  const bore=(azDeg(fx,fy,cx,cy)+offset)%360;
+  const clut=siteClutter(sites,fx,fy,clutter);
+  const geo=sites.map((s,i)=>{ const azV=azDeg(s.x,s.y,fx,fy), dH=Math.hypot(fx-s.x,fy-s.y);
+    const elV=Math.atan2(fz-s.z,Math.max(dH,1))*180/Math.PI, d=Math.sqrt(dH*dH+(fz-s.z)**2);
+    const pl=totalPL(S.center,d,'fs',S.building,clut[i]), fg=fsDish(angDiff(azDeg(fx,fy,s.x,s.y),bore),FS.gain);
+    return {azV,elV,base:eirpPk-peak-pl+fg-rej}; });
+  const avoid=beam?30:0, rnd=numpyRng(seed), out=[];
+  for(let n=0;n<nsnap;n++){
+    let s=0, cnt=0;
+    for(const g of geo){ for(const saz of [0,120,240]){
+      if(rnd()>LOAD) continue;
+      let beamAz=0;
+      for(let t=0;t<60;t++){ beamAz=saz+(-60+120*rnd()); if(avoid<=0) break; if(Math.abs(wrap180(g.azV-beamAz))>avoid) break; }
+      const beamEl=-(12*rnd());
+      const gg=arrayGain(array,wrap180(g.azV-saz),g.elV,wrap180(beamAz-saz),beamEl);
+      s+=lin(g.base+gg); cnt++; } }
+    out.push((cnt?toDb(s):-300)-nDbm);
+  }
+  const pct=pct80(out);
+  return {dist:out,pct,passes:pct<=-10,fsf,rej,clutMean:clut.reduce((a,b)=>a+b,0)/clut.length};
+}
+// ---- Engine A: FSS satellite (one fixed satellite direction) ----
+function mcFSS(o={}){
+  const rings=o.rings??S.rings, nsnap=o.nsnap??S.nsnap, seed=o.seed??S.seed, array=S.array;
+  const el=gsoElev(FSSP.lat,FSSP.satLon,FSSP.lon), az=gsoAz(FSSP.lat,FSSP.satLon,FSSP.lon);
+  const pl=slantPL(S.center,gsoSlant(el),el), nDbm=noise(S.bw,NF.fss), eirpPk=bsEirp(array), peak=PEAK[array];
+  const sites=hexSites(rings,S.isd), rnd=numpyRng(seed), out=[];
+  for(let n=0;n<nsnap;n++){ let s=0,cnt=0;
+    for(const site of sites){ for(const saz of [0,120,240]){
+      if(rnd()>LOAD) continue;
+      const beamAz=saz+(-60+120*rnd()), beamEl=-(12*rnd());
+      const g=arrayGain(array,wrap180(az-saz),el,wrap180(beamAz-saz),beamEl);
+      s+=lin(eirpPk-peak+g-pl+FSSP.satG); cnt++; } }
+    out.push((cnt?toDb(s):-300)-nDbm); }
+  const pct=pct80(out); return {pct,passes:pct<=-10.5,el,az};
+}
+// ---- Resolution 220 expected EIRP (illustrative) ----
+const RES220=[[0,5,27],[5,10,23],[10,15,19],[15,20,18],[20,30,16],[30,60,15],[60,90,15]];
+const resCache={};
+function res220Rel(array){
+  if(resCache[array]) return resCache[array];
+  const peak=PEAK[array], out=[];
+  for(const [lo,hi] of RES220){ let acc=0,n=0;
+    for(let th=lo+0.5;th<hi;th+=1){ for(let az=-177.5;az<180;az+=5){
+      for(let ba=-52.5;ba<60;ba+=15){ for(const be of [-1.5,-4.5,-7.5,-10.5]){
+        acc+=Math.pow(10,(arrayGain(array,az,th,ba,be)-peak)/10); n++; } } } }
+    out.push(10*log10(acc/n)); }
+  resCache[array]=out; return out;
+}
+function res220Rows(){ const dens=bsEirp()-10*log10(S.bw), rel=res220Rel(S.array);
+  return RES220.map(([lo,hi,lim],i)=>({lo,hi,lim,e:dens+rel[i],m:lim-(dens+rel[i])})); }
+
+/* ---------------- formatting ---------------- */
+const fmtS=(v,d=1)=>{ if(!isFinite(v)) return '—'; const r=Number(v.toFixed(d)); const z=r===0?0:r; return (z>0?'+':z<0?'−':'')+Math.abs(z).toFixed(d); };
+const fmtN=(v,d=1)=>{ const r=Number(v.toFixed(d)); return (r<0?'−':'')+Math.abs(r).toFixed(d); };
 
 /* ---------------- rendering ---------------- */
-const pctX=f=>(f-5925)/(7125-5925)*100;
-const pctW=b=>b/(7125-5925)*100;
-
+const pctX=f=>(f-5925)/(7125-5925)*100, pctW=b=>b/(7125-5925)*100;
+function carrierText(bw){ const n=Math.floor(bw/100), r=bw-100*n; if(n===0) return '1 × '+bw+' MHz NR carrier';
+  return (n===1&&r===0?'1 × 100 MHz':n+' × 100'+(r?' + '+r:'')+' MHz')+' NR carriers'; }
 function renderSpectrum(){
-  const ai=document.getElementById('allocImt');
-  ai.style.left=pctX(S.center-S.bw/2)+'%'; ai.style.width=pctW(S.bw)+'%';
-  const aw=document.getElementById('allocWifi');
-  aw.style.left=pctX(S.wifiC-S.wifiBw/2)+'%'; aw.style.width=pctW(S.wifiBw)+'%';
-  document.getElementById('allocFs').style.left=pctX(S.center+S.bw/2+S.guard+14)+'%';
+  const ai=document.getElementById('allocImt'); ai.style.left=pctX(S.center-S.bw/2)+'%'; ai.style.width=pctW(S.bw)+'%';
+  const wch=wifiChannel(S.wifiCh,S.wifiW), aw=document.getElementById('allocWifi');
+  aw.style.left=pctX(wch.lo)+'%'; aw.style.width=pctW(S.wifiW)+'%';
+  const ap=document.getElementById('allocPrim'); ap.style.left=pctX(wifiPrimary(S.wifiCh))+'%';
+  const ff=fsFreq(), af=document.getElementById('allocFs'); af.style.left=pctX(ff-FS.bw/2)+'%'; af.style.width=pctW(FS.bw)+'%';
+  const ov=overlapMHz(S.center,S.bw,wch.c,S.wifiW);
   document.getElementById('specReadout').textContent=
-    `Operator ${(S.center-S.bw/2).toFixed(0)}-${(S.center+S.bw/2).toFixed(0)} · `+
-    `Wi-Fi ${(S.wifiC-S.wifiBw/2).toFixed(0)}-${(S.wifiC+S.wifiBw/2).toFixed(0)} · `+
-    `overlap ${(overlap(S.center,S.bw,S.wifiC,S.wifiBw)*100).toFixed(0)}%`;
+    `Operator ${S.center-S.bw/2}–${S.center+S.bw/2} · Wi-Fi ${S.wifiCh}/${S.wifiW} ${wch.lo}–${wch.hi} (overlap ${ov} MHz) · FS ${ff-14}–${ff+14}`;
 }
-function card(vic,pair,val,unit,limit,limUnit,passes){
+function card(pair,vic,val,unit,limit,passes,kind,w){
   const cls=passes?'pass':'fail';
-  const w=Math.max(2,Math.min(100,(val+60)/80*100));
-  return `<div class="card ${cls}"><div class="pair">${pair}</div>
-    <div class="vic">${vic}</div>
+  return `<div class="card ${cls}"><div class="pair">${pair}</div><div class="vic">${vic}</div>
     <div class="status ${cls}">${passes?'PASS':'FAIL'}</div>
-    <div class="metric" style="color:${passes?'var(--green)':'var(--red)'}">${val>0?'+':''}${val.toFixed(1)}<span style="font-size:13px;color:var(--ink-faint)"> ${unit}</span></div>
-    <div class="limit">limit ${limit} ${limUnit}</div>
-    <div class="bar" style="width:${w}%"></div></div>`;
+    <div class="metric" style="color:${passes?'var(--green)':'var(--red)'}">${val}<span style="font-size:13px;color:var(--ink-faint)"> ${unit}</span></div>
+    <div class="limit">${limit}</div><div class="kind">${kind}</div><div class="bar" style="width:${w}%"></div></div>`;
 }
+let LAST={};
 function renderVerdicts(){
-  const fs=aggregateIN_FS(), fss=aggregateIN_FSS();
-  const wifiActive=wifiVictim('Active_UE',S.wifiC,S.wifiBw);
-  const wifiBase=S.wifiBw>=160?2300:1500;
-  const wifiLoss=(1-wifiActive/wifiBase)*100, wifiPass=wifiLoss<20;
-  const edgePL=totalPL(S.center,S.isd*0.7,'o2o');
-  const eirp=Math.min(53+ARRAY_GAIN[S.array],S.eirp);
-  const edgeSinr=(eirp-edgePL+UE_GAIN)-noise(S.bw,9)-3;
+  const fs=mcFS(), fss=mcFSS(); LAST.fs=fs;
+  const wv=wifiVictim('Active_UE',S.wifiCh,S.wifiW,false), base=WIFI_BASE[S.wifiW], loss=(1-wv.tp/base)*100;
+  const snr=cellEdgeSnr();
+  const bw=v=>Math.max(4,Math.min(100,(v+60)/80*100));
+  const fsDesc=(S.fsChan==='co'?'co-channel':`adjacent, ${S.guard} MHz clearance`)+`, ${S.sep} km, ${S.bearing}°`;
   document.getElementById('verdicts').innerHTML=
-    card('FSS satellite uplink','IMT → FSS',fss.pct,'dB I/N','−10.5','dB',fss.passes)+
-    card('Fixed Service link','IMT → FS',fs.pct,'dB I/N','−10','dB',fs.passes)+
-    card('Wi-Fi (selected channel)','IMT ↔ Wi-Fi',-wifiLoss,'% loss','−20','%',wifiPass)+
-    card('IMT cell edge','IMT ↔ IMT',edgeSinr,'dB SINR','0','dB',edgeSinr>0);
+    card('IMT → FSS','GSO satellite uplink',fmtS(fss.pct),'dB I/N','criterion ≤ −10.5 dB (80th pct)',fss.passes,'study criterion · this cluster only',bw(fss.pct))+
+    card('IMT → FS','Fixed Service, '+fsDesc,fmtS(fs.pct),'dB I/N','criterion ≤ −10 dB (80th pct)',fs.passes,'study criterion (F.758)',bw(fs.pct))+
+    card('IMT ↔ Wi-Fi',`Wi-Fi ${S.wifiCh}/${S.wifiW}, active UE`,fmtN(loss,0),'% loss','threshold ≤ 20% (illustrative)',loss<=20,wv.mode+' · overlap '+(wv.ov*100).toFixed(0)+'%',Math.max(4,100-loss))+
+    card('IMT ↔ IMT','Cell-edge SNR, no interference',fmtS(snr),'dB SNR','threshold ≥ 0 dB (illustrative)',snr>=0,TERMINALS[S.terminal].label+' · outdoor, 0.7 × ISD',bw(snr-20));
   return fs;
 }
 const cellClass=(v,b)=>{const r=v/b;return r>0.7?'cell-good':r>0.3?'cell-mid':'cell-bad';};
+const TRIAL={'221/160':{No_BTS:2343,No_UE:1777,Idle_UE:1481,Active_UE:62},'193/160':{No_BTS:2347,No_UE:1836,Idle_UE:1621,Active_UE:407},'189/160':{No_BTS:2347,No_UE:2331,Active_UE:2345},'221/80':{No_BTS:1506,No_UE:1206,Idle_UE:1074,Active_UE:336}};
 function renderWifiTable(){
-  // Wi-Fi channels tested against the actual operator block (S.center/S.bw).
-  // Moving the block changes the overlap and therefore the results.
-  const chans=[['Selected ('+S.wifiC+'/'+S.wifiBw+')',S.wifiC,S.wifiBw,false],
-    ['189/160 · 6895',6895,160,false],['193/160 · 6915',6915,160,false],
-    ['221/160 · 7055',7055,160,false],['221/80 · 7055',7055,80,false],
-    ['Ref trial (7050/80 carrier)',7055,160,true]];
   const states=['No_BTS','No_UE','Idle_UE','Active_UE'];
-  let h='<tr><th>Wi-Fi channel</th>'+states.map(s=>`<th>${s}</th>`).join('')+'<th>overlap</th></tr>';
-  chans.forEach(([name,wc,wbw,ref])=>{
-    const base=wbw>=160?2300:1500;
-    h+=`<tr><td>${name}</td>`;
-    states.forEach(st=>{const v=wifiVictim(st,wc,wbw,ref);
-      h+=`<td class="mono ${cellClass(v,base)}">${v.toFixed(0)}</td>`;});
-    // overlap against the interferer actually used for this row
-    const iC=ref?MOBILE_C:S.center, iBw=ref?MOBILE_BW:S.bw;
-    const ov=overlap(iC,iBw,wc,wbw)*100;
+  let h='<tr><th>Wi-Fi channel</th><th>span (MHz)</th><th>overlap</th><th>No BTS</th><th>No UE</th><th>Idle UE</th><th>Active UE</th><th>mode (active)</th></tr>';
+  const row=(label,ch,w,ref)=>{ const wch=wifiChannel(ch,w), base=WIFI_BASE[w];
+    const r=states.map(st=>wifiVictim(st,ch,w,ref)); const ov=r[3].ov*100;
     const col=ov>40?'var(--red)':ov>0?'var(--amber)':'var(--green)';
-    h+=`<td><span class="ov-chip" style="background:${col}22;color:${col}">${ov.toFixed(0)}%</span></td></tr>`;
-  });
+    return `<tr><td>${label}</td><td class="mono">${wch.lo}–${wch.hi}</td><td><span class="ov-chip" style="background:${col}22;color:${col}">${ov.toFixed(0)}%</span></td>`+
+      r.map(x=>`<td class="mono ${cellClass(x.tp,base)}">${x.tp.toFixed(0)}</td>`).join('')+`<td class="mono">${r[3].mode}</td></tr>`; };
+  h+=row(`Selected ${S.wifiCh}/${S.wifiW} vs operator block`,S.wifiCh,S.wifiW,false);
+  h+='<tr class="sep"><td colspan="8">Trial reference: 7050/80 MHz carrier (fixed), BT/Nokia Adastral Park, Hubble AP</td></tr>';
+  [['189/160',189,160],['193/160 (primary outside)',193,160],['221/160 (primary inside)',221,160],['221/80',221,80]].forEach(([lbl,ch,w])=>{
+    h+=row(lbl,ch,w,true); const t=TRIAL[ch+'/'+w];
+    if(t) h+=`<tr class="trial"><td>&nbsp;&nbsp;trial measurement</td><td></td><td></td>`+states.map(st=>`<td class="mono">${t[st]??'–'}</td>`).join('')+'<td></td></tr>'; });
   document.getElementById('wifiTable').innerHTML=h;
 }
 function setupCanvas(cv){
-  const dpr=2; // fixed for crisp rendering
-  // Read the intended CSS height once from a stable data attribute. Writing to
-  // cv.height mutates the 'height' attribute, so reading getAttribute('height')
-  // on later calls returns the doubled bitmap value and the canvas grows without
-  // bound. data-h is set once and never overwritten, so it stays correct.
-  let cssH = parseInt(cv.getAttribute('data-h'));
-  if(!cssH){ cssH = parseInt(cv.getAttribute('height'))||220; cv.setAttribute('data-h',cssH); }
-  const cssW = cv.clientWidth || 600;
-  cv.style.width='100%';
-  cv.style.height=cssH+'px';
-  cv.width=cssW*dpr; cv.height=cssH*dpr;
-  const ctx=cv.getContext('2d');
-  ctx.clearRect(0,0,cv.width,cv.height);
-  ctx.textBaseline='alphabetic';
+  const dpr=2; let cssH=parseInt(cv.getAttribute('data-h'));
+  if(!cssH){ cssH=parseInt(cv.getAttribute('height'))||220; cv.setAttribute('data-h',cssH); }
+  const cssW=cv.clientWidth||600; cv.style.width='100%'; cv.style.height=cssH+'px';
+  cv.width=cssW*dpr; cv.height=cssH*dpr; const ctx=cv.getContext('2d'); ctx.clearRect(0,0,cv.width,cv.height);
   return {ctx,w:cv.width,h:cv.height};
 }
+function niceStep(range,n=5){ const raw=range/n, p=Math.pow(10,Math.floor(log10(raw))), f=raw/p;
+  return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*p; }
+function axes(ctx,w,h,pad,ymin,ymax,xtitle,ytitle,yfmt=v=>fmtN(v,0)){
+  const Y=v=>h-pad.b-(h-pad.t-pad.b)*(v-ymin)/(ymax-ymin);
+  ctx.strokeStyle='rgba(255,255,255,.08)';ctx.fillStyle='#b3bbc8';ctx.font='22px IBM Plex Mono';ctx.textAlign='right';ctx.textBaseline='middle';
+  const st=niceStep(ymax-ymin);
+  for(let v=Math.ceil(ymin/st)*st; v<=ymax+1e-9; v+=st){const y=Y(v);ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(w-pad.r,y);ctx.stroke();ctx.fillText(yfmt(v),pad.l-10,y);}
+  ctx.fillStyle='#eef1f5';ctx.font='600 23px Space Grotesk';ctx.textAlign='center';ctx.textBaseline='bottom';
+  ctx.fillText(xtitle,(pad.l+w-pad.r)/2,h-6);
+  ctx.save();ctx.translate(14,(pad.t+h-pad.b)/2);ctx.rotate(-Math.PI/2);ctx.textBaseline='top';ctx.fillText(ytitle,0,0);ctx.restore();
+  return Y;
+}
+function polyline(ctx,xs,ys,X,Y,c,wd=4){ctx.strokeStyle=c;ctx.lineWidth=wd;ctx.beginPath();
+  ys.forEach((v,i)=>i?ctx.lineTo(X(xs[i]),Y(v)):ctx.moveTo(X(xs[i]),Y(v)));ctx.stroke();
+  ys.forEach((v,i)=>{ctx.fillStyle=c;ctx.beginPath();ctx.arc(X(xs[i]),Y(v),5,0,7);ctx.fill();});}
+function hline(ctx,w,pad,Y,v,c,dash=true){ctx.strokeStyle=c;ctx.lineWidth=2;if(dash)ctx.setLineDash([6,4]);ctx.beginPath();ctx.moveTo(pad.l,Y(v));ctx.lineTo(w-pad.r,Y(v));ctx.stroke();ctx.setLineDash([]);}
 function renderCovChart(){
-  const cv=document.getElementById('covChart'); const {ctx,w,h}=setupCanvas(cv);
-  const dists=[200,400,600,800,1000,1200], pad={l:64,r:18,t:18,b:58};
-  const u6op=[],u6val=[],g35=[];
-  dists.forEach(d=>{
-    const eO=Math.min(53+ARRAY_GAIN[S.array],S.eirp);
-    const plO=totalPL(7050,d,'o2i',S.building);   // U6 coverage at 7050 MHz, as in the paper (Fig. 3) and notebook
-    u6op.push(tput(eO-plO+UE_GAIN-noise(S.bw,9),S.bw));
-    const plV=totalPL(7050,d,'o2i',S.building);
-    // Matched bandwidth and matched EIRP: the cap binds for every array, so this
-    // curve is array-independent and isolates the carrier frequency.
-    u6val.push(tput(Math.min(53+ARRAY_GAIN['macro_64'],S.eirp)-plV+UE_GAIN-noise(80,9),80));
-    const pl35=totalPL(3500,d,'o2i',S.building);
-    g35.push(tput(Math.min(53+ARRAY_GAIN['macro_64'],S.eirp)-pl35+UE_GAIN-noise(80,9),80));
-  });
-  const ymax=Math.max(...u6op,...u6val,...g35)*1.12||1;
-  const X=i=>pad.l+(w-pad.l-pad.r)*i/(dists.length-1);
-  const Y=v=>h-pad.b-(h-pad.t-pad.b)*v/ymax;
-  // gridlines + y tick labels
-  ctx.strokeStyle='rgba(255,255,255,.06)';ctx.fillStyle='#9aa3b2';
-  ctx.font='17px IBM Plex Mono';ctx.textAlign='right';ctx.textBaseline='middle';
-  for(let g=0;g<=4;g++){const v=ymax*g/4,y=Y(v);
-    ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(w-pad.r,y);ctx.stroke();
-    ctx.fillText(v.toFixed(0),pad.l-8,y);}
-  // x tick labels
-  ctx.textAlign='center';ctx.textBaseline='top';
-  dists.forEach((d,i)=>ctx.fillText(d,X(i),h-pad.b+8));
-  // axis titles
-  ctx.fillStyle='#e8ebf0';ctx.font='600 18px Space Grotesk';
-  ctx.textBaseline='bottom';
-  ctx.fillText('Distance from cell (m)',(pad.l+w-pad.r)/2,h-6);
-  ctx.save();ctx.translate(16,(pad.t+h-pad.b)/2);ctx.rotate(-Math.PI/2);
-  ctx.textAlign='center';ctx.textBaseline='top';
-  ctx.fillText('DL throughput (Mbit/s)',0,0);ctx.restore();
-  // data lines
-  const line=(a,c,wd=4)=>{ctx.strokeStyle=c;ctx.lineWidth=wd;ctx.beginPath();
-    a.forEach((v,i)=>i?ctx.lineTo(X(i),Y(v)):ctx.moveTo(X(i),Y(v)));ctx.stroke();
-    a.forEach((v,i)=>{ctx.fillStyle=c;ctx.beginPath();ctx.arc(X(i),Y(v),5,0,7);ctx.fill();});};
-  line(g35,'#37c6d0');line(u6val,'#cf8a23');line(u6op,'#f2a93b',5);
+  const cv=document.getElementById('covChart'), {ctx,w,h}=setupCanvas(cv), pad={l:100,r:22,t:22,b:70};
+  const ds=[200,400,600,800,1000,1200];
+  const u6=ds.map(d=>coveragePoint(d,S.center,S.bw,S.array)), u6v=ds.map(d=>coveragePoint(d,S.center,80,'macro_64')), g35=ds.map(d=>coveragePoint(d,3500,80,'macro_64'));
+  const ymax=Math.max(...u6,...u6v,...g35,1)*1.12, X=d=>pad.l+(w-pad.l-pad.r)*(d-200)/1000;
+  const Y=axes(ctx,w,h,pad,0,ymax,'Distance from site (m)','DL throughput (Mbit/s)');
+  ctx.fillStyle='#b3bbc8';ctx.font='22px IBM Plex Mono';ctx.textAlign='center';ctx.textBaseline='top';ds.forEach(d=>ctx.fillText(d,X(d),h-pad.b+8));
+  polyline(ctx,ds,g35,X,Y,'#37c6d0');polyline(ctx,ds,u6v,X,Y,'#b06f12');polyline(ctx,ds,u6,X,Y,'#f2a93b',5);
 }
 function renderInChart(fs){
-  const cv=document.getElementById('inChart'); const {ctx,w,h}=setupCanvas(cv);
-  const data=fs.dist, pad={l:58,r:18,t:18,b:58};
-  // dynamic x-range from the data, padded, always including the -10 limit
-  let dmin=Math.min(...data, -15), dmax=Math.max(...data, -5);
-  const span=dmax-dmin; dmin-=span*0.08; dmax+=span*0.08;
+  const cv=document.getElementById('inChart'), {ctx,w,h}=setupCanvas(cv), pad={l:100,r:22,t:22,b:70}, data=fs.dist;
+  let dmin=Math.min(...data,-15), dmax=Math.max(...data,-5); const span=dmax-dmin; dmin-=span*0.08; dmax+=span*0.08;
   const bins=30, hist=new Array(bins).fill(0);
-  data.forEach(v=>{const b=Math.floor((v-dmin)/(dmax-dmin)*bins);if(b>=0&&b<bins)hist[b]++;});
-  const ymax=Math.max(...hist)*1.15||1;
-  const X=v=>pad.l+(w-pad.l-pad.r)*(v-dmin)/(dmax-dmin);
-  const Y=c=>h-pad.b-(h-pad.t-pad.b)*c/ymax;
-  // y gridlines + labels
-  ctx.strokeStyle='rgba(255,255,255,.06)';ctx.fillStyle='#9aa3b2';
-  ctx.font='16px IBM Plex Mono';ctx.textAlign='right';ctx.textBaseline='middle';
-  for(let g=0;g<=4;g++){const c=ymax*g/4,y=Y(c);
-    ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(w-pad.r,y);ctx.stroke();
-    ctx.fillText((c/data.length*100).toFixed(0)+'%',pad.l-8,y);}
-  // x ticks
-  ctx.textAlign='center';ctx.textBaseline='top';
-  const step=span>60?20:span>30?10:5;
-  for(let v=Math.ceil(dmin/step)*step;v<=dmax;v+=step){
-    ctx.fillText(v+'',X(v),h-pad.b+8);}
-  // axis titles
-  ctx.fillStyle='#e8ebf0';ctx.font='600 17px Space Grotesk';ctx.textBaseline='bottom';
-  ctx.fillText('Aggregate I/N (dB)',(pad.l+w-pad.r)/2,h-6);
-  ctx.save();ctx.translate(15,(pad.t+h-pad.b)/2);ctx.rotate(-Math.PI/2);
-  ctx.textAlign='center';ctx.textBaseline='top';
-  ctx.fillText('Share of snapshots',0,0);ctx.restore();
-  // bars
+  data.forEach(v=>{const b=Math.floor((v-dmin)/(dmax-dmin)*bins); if(b>=0&&b<bins) hist[b]++;});
+  const ymax=Math.max(...hist)*1.15||1, X=v=>pad.l+(w-pad.l-pad.r)*(v-dmin)/(dmax-dmin);
+  const Y=axes(ctx,w,h,pad,0,ymax,'Aggregate I/N (dB)','Share of snapshots',c=>(c/data.length*100).toFixed(0)+'%');
+  ctx.fillStyle='#b3bbc8';ctx.font='22px IBM Plex Mono';ctx.textAlign='center';ctx.textBaseline='top';
+  const step=span>60?20:span>30?10:5; for(let v=Math.ceil(dmin/step)*step;v<=dmax;v+=step) ctx.fillText(fmtN(v,0),X(v),h-pad.b+8);
   const bw=(w-pad.l-pad.r)/bins;
-  hist.forEach((c,i)=>{const v=dmin+(i+0.5)/bins*(dmax-dmin);
-    ctx.fillStyle=v<=-10?'rgba(242,169,59,.75)':'rgba(236,74,74,.75)';
+  hist.forEach((c,i)=>{const v=dmin+(i+0.5)/bins*(dmax-dmin); ctx.fillStyle=v<=-10?'rgba(242,169,59,.8)':'rgba(239,90,90,.8)';
     ctx.fillRect(X(dmin+i/bins*(dmax-dmin))+1,Y(c),bw-2,h-pad.b-Y(c));});
-  // limit line
-  if(-10>=dmin&&-10<=dmax){
-    ctx.strokeStyle='#ec4a4a';ctx.lineWidth=3;ctx.setLineDash([6,4]);
-    ctx.beginPath();ctx.moveTo(X(-10),pad.t);ctx.lineTo(X(-10),h-pad.b);ctx.stroke();ctx.setLineDash([]);}
-  // percentile marker
-  ctx.strokeStyle='#e8ebf0';ctx.lineWidth=2;
-  ctx.beginPath();ctx.moveTo(X(fs.pct),pad.t);ctx.lineTo(X(fs.pct),h-pad.b);ctx.stroke();
-  ctx.fillStyle='#e8ebf0';ctx.textAlign='left';ctx.textBaseline='alphabetic';ctx.font='16px IBM Plex Mono';
-  const tx=X(fs.pct)>w-180?X(fs.pct)-170:X(fs.pct)+6;
-  ctx.fillText('I/N@20% = '+fs.pct.toFixed(1)+' dB',tx,pad.t+16);
+  if(-10>=dmin&&-10<=dmax){ctx.strokeStyle='#ef5a5a';ctx.lineWidth=3;ctx.setLineDash([6,4]);ctx.beginPath();ctx.moveTo(X(-10),pad.t);ctx.lineTo(X(-10),h-pad.b);ctx.stroke();ctx.setLineDash([]);}
+  ctx.strokeStyle='#eef1f5';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(X(fs.pct),pad.t);ctx.lineTo(X(fs.pct),h-pad.b);ctx.stroke();
+  ctx.fillStyle='#eef1f5';ctx.textAlign='left';ctx.textBaseline='alphabetic';ctx.font='22px IBM Plex Mono';
+  const tx=X(fs.pct)>w-230?X(fs.pct)-220:X(fs.pct)+8; ctx.fillText('80th pct = '+fmtS(fs.pct)+' dB',tx,pad.t+18);
 }
 function renderScaleChart(){
-  const cv=document.getElementById('scaleChart'); if(!cv) return;
-  const {ctx,w,h}=setupCanvas(cv);
-  const pad={l:64,r:18,t:18,b:58};
-  const rings=[1,2,3,4]; const sites=rings.map(r=>1+3*r*(r+1));
-  // compute FS and FSS I/N at each ring (save/restore state)
-  const sv={rings:S.rings};
-  const fsArr=[], fssArr=[];
-  rings.forEach(r=>{ S.rings=r; fsArr.push(aggregateIN_FS().pct); fssArr.push(aggregateIN_FSS().pct); });
-  S.rings=sv.rings;
-  const all=[...fsArr,...fssArr,-10.5]; const ymin=Math.min(...all)-4, ymax=Math.max(...all,2)+4;
-  const X=i=>pad.l+(w-pad.l-pad.r)*i/(rings.length-1);
-  const Y=v=>h-pad.b-(h-pad.t-pad.b)*(v-ymin)/(ymax-ymin);
-  // grid + y labels
-  ctx.strokeStyle='rgba(255,255,255,.06)';ctx.fillStyle='#9aa3b2';
-  ctx.font='16px IBM Plex Mono';ctx.textAlign='right';ctx.textBaseline='middle';
-  for(let g=0;g<=4;g++){const v=ymin+(ymax-ymin)*g/4,y=Y(v);
-    ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(w-pad.r,y);ctx.stroke();
-    ctx.fillText(v.toFixed(0),pad.l-8,y);}
-  // x labels (sites)
-  ctx.textAlign='center';ctx.textBaseline='top';
-  sites.forEach((s,i)=>ctx.fillText(s+' sites',X(i),h-pad.b+8));
-  // axis titles
-  ctx.fillStyle='#e8ebf0';ctx.font='600 17px Space Grotesk';ctx.textBaseline='bottom';
-  ctx.fillText('Network size',(pad.l+w-pad.r)/2,h-6);
-  ctx.save();ctx.translate(15,(pad.t+h-pad.b)/2);ctx.rotate(-Math.PI/2);
-  ctx.textAlign='center';ctx.textBaseline='top';ctx.fillText('Aggregate I/N (dB)',0,0);ctx.restore();
-  // limit lines
-  ctx.setLineDash([6,4]);ctx.lineWidth=2;ctx.strokeStyle='#ec4a4a';
-  [[-10,'FS −10'],[-10.5,'FSS −10.5']].forEach(([lim])=>{
-    if(lim>=ymin&&lim<=ymax){ctx.beginPath();ctx.moveTo(pad.l,Y(lim));ctx.lineTo(w-pad.r,Y(lim));ctx.stroke();}});
-  ctx.setLineDash([]);
-  // data lines
-  const line=(a,c)=>{ctx.strokeStyle=c;ctx.lineWidth=4;ctx.beginPath();
-    a.forEach((v,i)=>i?ctx.lineTo(X(i),Y(v)):ctx.moveTo(X(i),Y(v)));ctx.stroke();
-    a.forEach((v,i)=>{ctx.fillStyle=c;ctx.beginPath();ctx.arc(X(i),Y(v),5,0,7);ctx.fill();});};
-  line(fssArr,'#f2a93b'); line(fsArr,'#37c6d0');
+  const cv=document.getElementById('scaleChart'), {ctx,w,h}=setupCanvas(cv), pad={l:100,r:22,t:22,b:70};
+  const rings=[1,2,3,4], sites=rings.map(r=>1+3*r*(r+1));
+  const fsA=rings.map(r=>mcFS({rings:r}).pct), fssA=rings.map(r=>mcFSS({rings:r}).pct);
+  const all=[...fsA,...fssA,-10.5], ymin=Math.min(...all)-4, ymax=Math.max(...all,2)+4, X=i=>pad.l+(w-pad.l-pad.r)*i/3;
+  const Y=axes(ctx,w,h,pad,ymin,ymax,'Network size','Aggregate I/N (dB)',v=>fmtN(v,0));
+  ctx.fillStyle='#b3bbc8';ctx.font='22px IBM Plex Mono';ctx.textAlign='center';ctx.textBaseline='top';sites.forEach((s,i)=>{ctx.textAlign=i===0?'left':i===3?'right':'center';ctx.fillText(s+' sites',X(i),h-pad.b+8);});ctx.textAlign='center';
+  [-10,-10.5].forEach(l=>{if(l>=ymin&&l<=ymax)hline(ctx,w,pad,Y,l,'#ef5a5a');});
+  polyline(ctx,[0,1,2,3],fssA,X,Y,'#f2a93b');polyline(ctx,[0,1,2,3],fsA,X,Y,'#37c6d0');
 }
-
+function stackValues(){
+  const sc=[['Co-channel',{chan:'co',beam:0,pwr:0}],['60 MHz',{chan:'adj',guard:60,beam:0,pwr:0}],['+ beam',{chan:'adj',guard:60,beam:1,pwr:0}],
+            ['120 + beam',{chan:'adj',guard:120,beam:1,pwr:0}],['+10 dB',{chan:'adj',guard:120,beam:1,pwr:10}]];
+  return sc.map(([l,o])=>[l,mcFS(o).pct]);
+}
 function renderStackChart(){
-  const cv=document.getElementById('stackChart'); if(!cv) return;
-  const {ctx,w,h}=setupCanvas(cv);
-  const pad={l:60,r:18,t:18,b:64};
-  const scen=[['None',{}],['60 MHz',{guard:60}],['+ Beam',{guard:60,beam:1}],
-              ['120 + Beam',{guard:120,beam:1}],['+10 dB',{guard:120,beam:1,pwr:10}]];
-  const sv={guard:S.guard,beam:S.beam,afc:S.afc,pwr:S.pwr};
-  const vals=scen.map(([,kw])=>{ S.guard=kw.guard||0; S.beam=kw.beam||0; S.afc=0; S.pwr=kw.pwr||0;
-    return aggregateIN_FS().pct; });
-  Object.assign(S,sv);
-  const ymin=Math.min(...vals,-12)-5, ymax=Math.max(...vals,2)+3;
-  const X=i=>pad.l+(w-pad.l-pad.r)*(i+0.5)/scen.length;
-  const Y=v=>h-pad.b-(h-pad.t-pad.b)*(v-ymin)/(ymax-ymin);
-  const bw=(w-pad.l-pad.r)/scen.length*0.6;
-  // grid + y labels
-  ctx.strokeStyle='rgba(255,255,255,.06)';ctx.fillStyle='#9aa3b2';
-  ctx.font='16px IBM Plex Mono';ctx.textAlign='right';ctx.textBaseline='middle';
-  for(let g=0;g<=4;g++){const v=ymin+(ymax-ymin)*g/4,y=Y(v);
-    ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(w-pad.r,y);ctx.stroke();
-    ctx.fillText(v.toFixed(0),pad.l-8,y);}
-  // bars
-  const zeroY=Y(Math.max(ymin,Math.min(ymax,0)));
-  vals.forEach((v,i)=>{
-    ctx.fillStyle=v<=-10?'rgba(62,207,142,.8)':'rgba(236,74,74,.8)';
-    const y=Y(v); ctx.fillRect(X(i)-bw/2, Math.min(y,Y(ymin)), bw, Math.abs(Y(ymin)-y));
-    // value label
-    ctx.fillStyle=v<=-10?'#3ecf8e':'#ec4a4a';ctx.font='600 15px IBM Plex Mono';
-    ctx.textAlign='center';ctx.textBaseline='bottom';
-    ctx.fillText((v>0?'+':'')+v.toFixed(0),X(i),y-4);});
-  // x labels
-  ctx.fillStyle='#9aa3b2';ctx.font='14px Space Grotesk';ctx.textAlign='center';ctx.textBaseline='top';
-  scen.forEach(([lbl],i)=>ctx.fillText(lbl,X(i),h-pad.b+8));
-  // limit line
-  ctx.setLineDash([6,4]);ctx.lineWidth=2;ctx.strokeStyle='#e8ebf0';
-  ctx.beginPath();ctx.moveTo(pad.l,Y(-10));ctx.lineTo(w-pad.r,Y(-10));ctx.stroke();ctx.setLineDash([]);
-  // axis title
-  ctx.fillStyle='#e8ebf0';ctx.font='600 17px Space Grotesk';ctx.textBaseline='bottom';
-  ctx.fillText('Mitigation applied',(pad.l+w-pad.r)/2,h-6);
-  ctx.save();ctx.translate(15,(pad.t+h-pad.b)/2);ctx.rotate(-Math.PI/2);
-  ctx.textAlign='center';ctx.textBaseline='top';ctx.fillText('FS I/N @20% (dB)',0,0);ctx.restore();
+  const cv=document.getElementById('stackChart'), {ctx,w,h}=setupCanvas(cv), pad={l:100,r:22,t:26,b:76};
+  const sv=stackValues(), vals=sv.map(x=>x[1]), ymin=Math.min(...vals,-12)-5, ymax=Math.max(...vals,2)+4;
+  const X=i=>pad.l+(w-pad.l-pad.r)*(i+0.5)/sv.length, bw=(w-pad.l-pad.r)/sv.length*0.6;
+  const Y=axes(ctx,w,h,pad,ymin,ymax,'Mitigation applied','FS I/N, 80th pct (dB)',v=>fmtN(v,0));
+  vals.forEach((v,i)=>{ctx.fillStyle=v<=-10?'rgba(62,207,142,.85)':'rgba(239,90,90,.85)'; const y=Y(v);
+    ctx.fillRect(X(i)-bw/2,Math.min(y,Y(ymin)),bw,Math.abs(Y(ymin)-y));
+    ctx.fillStyle=v<=-10?'#3ecf8e':'#ef5a5a';ctx.font='600 21px IBM Plex Mono';ctx.textAlign='center';ctx.textBaseline='bottom';ctx.fillText(fmtS(v),X(i),y-4);});
+  ctx.fillStyle='#b3bbc8';ctx.font='21px Space Grotesk';ctx.textAlign='center';ctx.textBaseline='top';sv.forEach(([l],i)=>ctx.fillText(l,X(i),h-pad.b+8));
+  hline(ctx,w,pad,Y,-10,'#eef1f5');
 }
-
+let bearData=null, bearKey='';
+function stateKey(){ const k={...S}; delete k.ulDev; delete k.ulDist; delete k.ulCoord; delete k.bearing; delete k.wifiW; delete k.wifiCh; delete k.terminal; return JSON.stringify(k); }
+function runBearing(){
+  const bs=[0,15,30,45,60,75,90,105,120,135,150,165,180];
+  bearData={bs,a:bs.map(b=>mcFS({bearing:b,chan:'adj',guard:60,beam:1}).pct),b:bs.map(b=>mcFS({bearing:b,chan:'adj',guard:120,beam:1}).pct)};
+  bearKey=stateKey(); renderBearChart();
+}
+function renderBearChart(){
+  const cv=document.getElementById('bearChart'), {ctx,w,h}=setupCanvas(cv), pad={l:100,r:22,t:22,b:70};
+  const note=document.getElementById('bearNote');
+  if(!bearData){note.textContent='';return;}
+  const {bs,a,b}=bearData, all=[...a,...b,-10], ymin=Math.min(...all)-3, ymax=Math.max(...all)+3, X=v=>pad.l+(w-pad.l-pad.r)*v/180;
+  const Y=axes(ctx,w,h,pad,ymin,ymax,'Victim bearing from cluster centre (deg)','FS I/N, 80th pct (dB)',v=>fmtN(v,0));
+  ctx.fillStyle='#b3bbc8';ctx.font='22px IBM Plex Mono';ctx.textAlign='center';ctx.textBaseline='top';[0,45,90,135,180].forEach(v=>ctx.fillText(v+'°',X(v),h-pad.b+8));
+  hline(ctx,w,pad,Y,-10,'#ef5a5a'); polyline(ctx,bs,a,X,Y,'#f2a93b',3); polyline(ctx,bs,b,X,Y,'#37c6d0',3);
+  const pa=a.filter(v=>v<=-10).length, pb=b.filter(v=>v<=-10).length;
+  note.textContent=`Meets the criterion at ${pa} of ${bs.length} bearings (60 MHz + avoidance) and ${pb} of ${bs.length} (120 MHz + avoidance).`+(bearKey!==stateKey()?' Settings have changed since this sweep: run it again.':'');
+}
 function renderBeamChart(){
-  const cv=document.getElementById('beamChart'); if(!cv) return;
-  const {ctx,w,h}=setupCanvas(cv);
-  const pad={l:58,r:18,t:18,b:56};
+  const cv=document.getElementById('beamChart'), {ctx,w,h}=setupCanvas(cv), pad={l:100,r:22,t:22,b:70};
   const azs=[]; for(let a=-90;a<=90;a+=1) azs.push(a);
-  const gSel=azs.map(a=>arrayGain(S.array,a,0));
-  const gRef=azs.map(a=>arrayGain('macro_64',a,0));
-  const ymin=-25, ymax=32;
-  const X=a=>pad.l+(w-pad.l-pad.r)*(a+90)/180;
-  const Y=v=>h-pad.b-(h-pad.t-pad.b)*(v-ymin)/(ymax-ymin);
-  ctx.strokeStyle='rgba(255,255,255,.06)';ctx.fillStyle='#9aa3b2';
-  ctx.font='16px IBM Plex Mono';ctx.textAlign='right';ctx.textBaseline='middle';
-  for(let v=-20;v<=30;v+=10){const y=Y(v);
-    ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(w-pad.r,y);ctx.stroke();
-    ctx.fillText(v+'',pad.l-8,y);}
-  ctx.textAlign='center';ctx.textBaseline='top';
-  [-90,-45,0,45,90].forEach(a=>ctx.fillText(a+'°',X(a),h-pad.b+8));
-  ctx.fillStyle='#e8ebf0';ctx.font='600 17px Space Grotesk';ctx.textBaseline='bottom';
-  ctx.fillText('Azimuth from boresight',(pad.l+w-pad.r)/2,h-6);
-  ctx.save();ctx.translate(15,(pad.t+h-pad.b)/2);ctx.rotate(-Math.PI/2);
-  ctx.textAlign='center';ctx.textBaseline='top';ctx.fillText('Array gain (dBi)',0,0);ctx.restore();
-  const line=(a,c,wd)=>{ctx.strokeStyle=c;ctx.lineWidth=wd;ctx.beginPath();
-    a.forEach((v,i)=>i?ctx.lineTo(X(azs[i]),Y(v)):ctx.moveTo(X(azs[i]),Y(v)));ctx.stroke();};
-  line(gRef,'#5c6573',2); line(gSel,'#f2a93b',3);
+  const gSel=azs.map(a=>arrayGain(S.array,a,0)), gRef=azs.map(a=>arrayGain('macro_64',a,0)), X=a=>pad.l+(w-pad.l-pad.r)*(a+90)/180;
+  const Y=axes(ctx,w,h,pad,-25,32,'Azimuth from boresight','Array gain (dBi)',v=>fmtN(v,0));
+  ctx.fillStyle='#b3bbc8';ctx.font='22px IBM Plex Mono';ctx.textAlign='center';ctx.textBaseline='top';[-90,-45,0,45,90].forEach(a=>ctx.fillText(fmtN(a,0)+'°',X(a),h-pad.b+8));
+  const line=(arr,c,wd)=>{ctx.strokeStyle=c;ctx.lineWidth=wd;ctx.beginPath();arr.forEach((v,i)=>i?ctx.lineTo(X(azs[i]),Y(v)):ctx.moveTo(X(azs[i]),Y(v)));ctx.stroke();};
+  line(gRef,'#6b7584',2); line(gSel,'#f2a93b',3);
 }
-
 function renderUlPanel(){
-  const el=document.getElementById('ulPanel'); if(!el) return;
-  const r=ulCoexistence(S.ulDev,S.wifiC,S.wifiBw,S.ulDist,S.ulAfc);
-  const devName=S.ulDev==='handheld'?'Handheld UE (26 dBm)':'Rooftop CPE (31 dBm)';
-  const chip=(ok)=>`<span style="display:inline-block;padding:2px 9px;border-radius:10px;font-size:11px;font-weight:600;background:${ok?'rgba(62,207,142,.16)':'rgba(236,74,74,.16)'};color:${ok?'var(--green)':'var(--red)'}">${ok?'MEETS CRITERION':'EXCEEDS'}</span>`;
-  const bigVerdict = r.fair
-    ? `<span style="color:var(--green)">BOTH CRITERIA MET</span>`
-    : `<span style="color:var(--red)">${S.ulAfc?'CRITERION EXCEEDED AT THIS SEPARATION':'CRITERION EXCEEDED (CO-CHANNEL)'}</span>`;
-  const afcNote = S.ulAfc
-    ? (r.afcShift>0 ? `AFC moved the IMT carrier ${r.afcShift.toFixed(0)} MHz clear of the Wi-Fi channel (overlap now ${(r.ovEff*100).toFixed(0)}%).`
-                    : `AFC active; the IMT carrier already clears the Wi-Fi channel.`)
-    : `AFC off: the IMT carrier overlaps the Wi-Fi channel by ${(r.ovEff*100).toFixed(0)}%.`;
-  el.innerHTML=`
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
-      <div style="background:var(--panel2,rgba(255,255,255,.03));border:1px solid var(--line);border-radius:8px;padding:12px 14px">
-        <div style="font-size:12px;color:var(--ink-dim);margin-bottom:6px">Direction 1 &nbsp;·&nbsp; ${devName} &#8594; Wi-Fi AP</div>
-        <div style="font-size:20px;font-weight:600;margin-bottom:4px" class="mono">${r.rxAtAp.toFixed(1)} dBm</div>
-        <div style="font-size:12px;color:var(--ink-dim);margin-bottom:8px">Criterion: below &#8722;72 dBm (airtime-model transition) &nbsp;·&nbsp; airtime loss ${r.wifiLoss.toFixed(0)}%</div>
-        ${chip(r.wifiOk)}
-      </div>
-      <div style="background:var(--panel2,rgba(255,255,255,.03));border:1px solid var(--line);border-radius:8px;padding:12px 14px">
-        <div style="font-size:12px;color:var(--ink-dim);margin-bottom:6px">Direction 2 &nbsp;·&nbsp; Wi-Fi AP &#8594; ${S.ulDev==='handheld'?'UE':'CPE'} uplink Rx</div>
-        <div style="font-size:20px;font-weight:600;margin-bottom:4px" class="mono">I/N = ${r.inAtDev.toFixed(1)} dB</div>
-        <div style="font-size:12px;color:var(--ink-dim);margin-bottom:8px">Criterion: I/N &lt; &#8722;6 dB (IMT)</div>
-        ${chip(r.imtOk)}
-      </div>
+  const r=ulCoexistence(S.ulDev,S.wifiCh,S.wifiW,S.ulDist,S.ulCoord), d=UL_DEVICES[S.ulDev];
+  const chip=ok=>`<span class="chip ${ok?'ok':'no'}">${ok?'MEETS CRITERION':'EXCEEDS'}</span>`;
+  const note=S.ulCoord?(r.shift>0?`Coordinated: the IMT carrier sits at ${r.mC} MHz, clear of the Wi-Fi channel by 20 MHz (rejection ${r.rej.toFixed(1)} dB).`:'Coordinated, but no clear assignment fits in the band: the carrier stays on the Wi-Fi channel.')
+    :`Co-channel: a ${Math.min(100,S.bw)} MHz NR carrier on the Wi-Fi channel centre (overlap ${(r.ov*100).toFixed(0)}% of the Wi-Fi channel).`;
+  document.getElementById('ulPanel').innerHTML=`
+    <div class="ul-grid">
+      <div class="ul-box"><div style="font-size:12.5px;color:var(--ink-dim);margin-bottom:6px">${d.label} → Wi-Fi AP</div>
+        <div class="mono" style="font-size:20px;font-weight:600;margin-bottom:4px">${fmtN(r.rxAp,1)} dBm</div>
+        <div style="font-size:12.5px;color:var(--ink-dim);margin-bottom:8px">Criterion: below −72 dBm (airtime-model onset) · airtime loss ${r.wifiLoss.toFixed(0)}%</div>${chip(r.wifiOk)}</div>
+      <div class="ul-box"><div style="font-size:12.5px;color:var(--ink-dim);margin-bottom:6px">Wi-Fi AP → ${S.ulDev==='handheld'?'handheld':'CPE'} (downlink slots)</div>
+        <div class="mono" style="font-size:20px;font-weight:600;margin-bottom:4px">I/N ${fmtS(r.inDev,1)} dB</div>
+        <div style="font-size:12.5px;color:var(--ink-dim);margin-bottom:8px">Criterion: I/N below −6 dB (IMT)</div>${chip(r.imtOk)}</div>
     </div>
-    <div style="font-size:13px;color:var(--ink-dim);margin-bottom:8px">${afcNote}</div>
-    <div style="font-size:16px;font-weight:600;padding:10px 14px;border-radius:8px;background:${r.fair?'rgba(62,207,142,.08)':'rgba(236,74,74,.08)'};border:1px solid ${r.fair?'rgba(62,207,142,.25)':'rgba(236,74,74,.25)'}">
-      Verdict: ${bigVerdict}
-    </div>
-    <div style="font-size:11px;color:var(--ink-faint,#5c6573);margin-top:10px;line-height:1.5">
-      Criteria as in the paper (Section VI.B): device-to-AP interference below the &#8722;72 dBm transition of the airtime model, and AP-to-terminal I/N below the &#8722;6 dB IMT criterion. With coordination (AFC assignment, a 180 MHz centre separation for 160 MHz channels), both device classes exceed the terminal criterion at 5 m, only the handheld meets it at 10 m, and both meet it at 20 m; co-channel operation exceeds it at all three. These are terminal-level budgets and do not establish protection of the serving base-station uplink receiver.
-    </div>`;
+    <div style="font-size:13px;color:var(--ink-dim);margin-bottom:8px">${note}</div>
+    <div style="font-size:15px;font-weight:600;padding:10px 14px;border-radius:8px;background:${r.both?'rgba(62,207,142,.08)':'rgba(239,90,90,.08)'};border:1px solid ${r.both?'rgba(62,207,142,.3)':'rgba(239,90,90,.3)'}">
+      ${r.both?'<span style="color:var(--green)">Both criteria met at '+S.ulDist+' m</span>':'<span style="color:var(--red)">At least one criterion exceeded at '+S.ulDist+' m</span>'}</div>`;
 }
-
+function renderResTable(){
+  const rows=res220Rows();
+  let h='<tr><th>Elevation range</th><th>Expected EIRP (dBm/MHz)</th><th>Limit (dBm/MHz)</th><th>Margin (dB)</th></tr>';
+  rows.forEach(r=>{h+=`<tr><td>${r.lo}°–${r.hi}°</td><td class="mono">${fmtN(r.e,1)}</td><td class="mono">${r.lim}</td><td class="mono ${r.m>=0?'cell-good':'cell-bad'}">${fmtS(r.m,1)}</td></tr>`;});
+  document.getElementById('resTable').innerHTML=h;
+}
 function renderMitigation(fs){
+  const relief=mcFS({beam:0}).pct-mcFS({beam:1}).pct, at5=mcFS({sep:5}).pct;
+  const rejTxt=S.fsChan==='co'?`${fs.rej.toFixed(1)} dB`:`${fs.rej.toFixed(1)} dB`;
   const mits=[
-    {n:'Guard band',db:coupling(S.center,S.bw,S.center+S.bw/2+S.guard+14,28).toFixed(0),
-     note:'Spectral rejection against the 28 MHz FS channel at the applied edge clearance (paper: 34.2 dB at 60 MHz, 40.2 dB at 120 MHz). '+S.guard+' MHz applied.',
-     feas:'standardised',eff:S.guard>0},
-    {n:'Separation distance',db:(totalPL(S.center,S.sep*1000,'fs')-totalPL(S.center,5000,'fs')).toFixed(0),
-     note:'FS receiver at '+S.sep.toFixed(1)+' km; additional path loss relative to 5 km.',
-     feas:'coordination',eff:S.sep>5},
-    {n:'Beam avoidance',db:S.beam?'11.4':'0',
-     note:'Aggregate relief, served-user directions within ±30° of the victim excluded (reference case). '+(S.beam?'Active.':'Inactive.'),
-     feas:'standardised',eff:S.beam>0},
-    {n:'Power / downtilt',db:S.pwr.toFixed(0),
-     note:'EIRP reduction; trades own-cell coverage for protection.',
-     feas:'standardised',eff:S.pwr>0},
-    {n:'AFC database',db:S.afc?'via clearance':'0',
-     note:'Acts through the assigned clearance, not as a separate gain. '+(S.afc?'Active.':'Inactive.'),
-     feas:'standardised',eff:S.afc>0},
-    {n:'Sensing / LBT',db:'0',
-     note:'Hidden node: an outdoor terminal cannot detect an indoor access point behind building loss.',
-     feas:'needs standard',eff:false},
+    {n:'Spectral clearance',db:rejTxt,note:S.fsChan==='co'?'Co-channel: only the bandwidth share of the block falls in the 28 MHz FS channel (plus leakage from the rest). Select "Adjacent" to apply an edge clearance.'
+       :`Rejection against the 28 MHz FS channel at ${S.guard} MHz edge clearance (bandwidth-integrated ACIR; 34.2 dB at 60 MHz and 40.2 dB at 120 MHz for the reference block).`,feas:'standardised',eff:S.fsChan==='adj'},
+    {n:'Separation distance',db:`${fmtS(fs.pct-at5)} dB`,note:`Change in aggregate I/N at ${S.sep} km relative to 5 km (matched runs). Within radio line of sight, a receding cluster falls further into the dish main lobe, so the change is small.`,feas:'coordination',eff:S.sep!==5},
+    {n:'Beam avoidance',db:`${fmtN(relief,1)} dB`,note:`Aggregate relief from excluding served-user directions within ±30° of the victim, for the current settings (with minus without). ${S.beam?'Active.':'Not applied.'}`,feas:'implementation-specific',eff:S.beam>0},
+    {n:'EIRP reduction',db:`${S.pwr} dB`,note:'Lowers every interference path and also the own-network coverage and cell-edge SNR shown above.',feas:'standardised',eff:S.pwr>0},
+    {n:'Clutter at base stations',db:`${fmtN(fs.clutMean,1)} dB mean`,note:'Average P.2108-1 clutter loss over the sites in the current mode. The dominant assumption for the Fixed-Service result.',feas:'deployment-specific',eff:S.clutter!=='none'},
+    {n:'AFC',db:'via clearance',note:'Represents the assignment of channel and clearance (set above), not an additional gain.',feas:'database',eff:false},
+    {n:'Sensing / LBT',db:'0 dB',note:'Hidden node: an outdoor terminal cannot detect an indoor access point behind building entry loss.',feas:'needs standard',eff:false},
   ];
-  document.getElementById('mitGrid').innerHTML=mits.map(m=>
-    `<div class="mit ${m.eff?'eff':''}"><div class="mh"><span class="mname">${m.n}</span>
-     <span class="mdb">${isNaN(parseFloat(m.db))?m.db:'−'+m.db+' dB'}</span></div>
-     <div class="mnote">${m.note}</div><div class="mfeas">${m.feas}</div></div>`).join('');
+  document.getElementById('mitGrid').innerHTML=mits.map(m=>`<div class="mit ${m.eff?'eff':''}"><div class="mh"><span class="mname">${m.n}</span><span class="mdb">${m.db}</span></div><div class="mnote">${m.note}</div><div class="mfeas">${m.feas}</div></div>`).join('');
 }
 function renderAll(){
-  renderSpectrum();
-  const fs=renderVerdicts();
-  renderWifiTable();
-  renderUlPanel();
-  renderCovChart();
-  renderInChart(fs);
-  renderScaleChart();
-  renderStackChart();
-  renderBeamChart();
-  renderMitigation(fs);
+  document.body.classList.add('busy');
+  renderSpectrum(); const fs=renderVerdicts(); renderWifiTable(); renderUlPanel(); renderCovChart(); renderInChart(fs);
+  renderScaleChart(); renderStackChart(); renderResTable(); renderMitigation(fs); renderBeamChart(); renderBearChart();
+  document.body.classList.remove('busy'); writeHash();
 }
-/* ---- wiring ---- */
-// A full redraw re-runs the Monte Carlo evaluations (a few seconds), so slider moves
-// update their label at once and redraw 250 ms after the slider stops.
-let redrawTimer=null;
-function scheduleRedraw(){ clearTimeout(redrawTimer); redrawTimer=setTimeout(renderAll,250); }
-function bindSlider(id,key,fmt,after){
-  const el=document.getElementById(id), out=document.getElementById('v'+id.charAt(0).toUpperCase()+id.slice(1));
-  el.addEventListener('input',()=>{S[key]=parseFloat(el.value);if(out)out.textContent=fmt(S[key]);scheduleRedraw();});
+/* ---- controls ---- */
+const $=id=>document.getElementById(id);
+function wifiList(){ return validPrimaries(S.wifiW); }
+function syncControls(){
+  const c=$('center'); c.min=U6_START+S.bw/2; c.max=U6_STOP-S.bw/2; S.center=Math.min(Math.max(S.center,+c.min),+c.max); c.value=S.center;
+  $('vCenter').textContent=`${S.center} MHz (${S.center-S.bw/2}–${S.center+S.bw/2})`;
+  $('bw').value=S.bw; $('vBw').textContent=S.bw+' MHz'; $('carrierHint').textContent=carrierText(S.bw)+' within the block.';
+  $('eirp').value=S.eirp; $('vEirp').textContent=S.eirp+' dBm';
+  $('isd').value=S.isd; $('vIsd').textContent=S.isd+' m';
+  $('rings').value=S.rings; $('vRings').textContent=(1+3*S.rings*(S.rings+1))+' sites';
+  const L=wifiList(); if(!L.includes(S.wifiCh)){ S.wifiCh=L.reduce((a,b)=>Math.abs(b-S.wifiCh)<Math.abs(a-S.wifiCh)?b:a); }
+  const wi=$('wifiIdx'); wi.max=L.length-1; wi.value=L.indexOf(S.wifiCh);
+  const wch=wifiChannel(S.wifiCh,S.wifiW); $('vWifiIdx').textContent=`ch ${S.wifiCh} · ${wifiPrimary(S.wifiCh)} MHz · ${wch.lo}–${wch.hi}`;
+  const maxG=Math.max(0,Math.max(U6_STOP-(S.center+S.bw/2)-FS.bw,(S.center-S.bw/2)-U6_START-FS.bw));
+  const g=$('guard'); g.max=Math.min(200,Math.floor(maxG/5)*5); S.guard=Math.min(S.guard,+g.max); g.value=S.guard; g.disabled=S.fsChan==='co';
+  $('vGuard').textContent=S.fsChan==='co'?'n/a (co-channel)':S.guard+' MHz';
+  $('sep').value=S.sep; $('vSep').textContent=S.sep.toFixed(1)+' km';
+  $('bearing').value=S.bearing; $('vBearing').textContent=S.bearing+'°';
+  $('offset').value=S.offset; $('vOffset').textContent=S.offset+'°';
+  $('pwr').value=S.pwr; $('vPwr').textContent=S.pwr+' dB';
+  $('seed').value=S.seed; $('ulDist').value=S.ulDist; $('vUlDist').textContent=S.ulDist+' m';
+  const segs={arraySeg:'array',bldgSeg:'building',termSeg:'terminal',wifiWSeg:'wifiW',fsChanSeg:'fsChan',clutSeg:'clutter',beamSeg:'beam',nsnapSeg:'nsnap',ulDevSeg:'ulDev',ulCoordSeg:'ulCoord'};
+  for(const [id,key] of Object.entries(segs)) document.querySelectorAll('#'+id+' button').forEach(b=>b.classList.toggle('on',String(S[key])===b.dataset.v));
+  document.querySelectorAll('#presetSeg button').forEach(b=>b.classList.toggle('on',(b.dataset.v==='ref'&&S.center===6625&&S.bw===200)||(b.dataset.v==='uae'&&S.center===6600&&S.bw===350)));
 }
-function bindSeg(id,key,after){
-  document.querySelectorAll('#'+id+' button').forEach(b=>b.addEventListener('click',()=>{
-    document.querySelectorAll('#'+id+' button').forEach(x=>x.classList.remove('on'));
-    b.classList.add('on');
-    const v=b.dataset.v; S[key]=isNaN(+v)?v:+v; renderAll();
-  }));
-}
-bindSlider('center','center',v=>v+' MHz');
-bindSlider('bw','bw',v=>v+' MHz');
-bindSlider('eirp','eirp',v=>v+' dBm');
-bindSlider('isd','isd',v=>v+' m');
-bindSlider('rings','rings',v=>{const n=1+3*v*(v+1);return n+' sites';});
-bindSlider('wifiC','wifiC',v=>v+' MHz');
-bindSlider('guard','guard',v=>v+' MHz');
-bindSlider('sep','sep',v=>v.toFixed(1)+' km');
-bindSlider('pwr','pwr',v=>v+' dB');
-bindSeg('arraySeg','array');
-bindSeg('bldgSeg','building');
-bindSeg('wifiBwSeg','wifiBw');
-bindSeg('beamSeg','beam');
-bindSeg('afcSeg','afc');
-bindSeg('ulDevSeg','ulDev');
-bindSlider('ulDist','ulDist',v=>v+' m');
-bindSeg('ulAfcSeg','ulAfc');
-window.addEventListener('resize',scheduleRedraw);
-renderAll();
-
+let timer=null;
+function changed(immediate){ syncControls(); renderSpectrum(); clearTimeout(timer); timer=setTimeout(renderAll,immediate?0:250); }
+function bindRange(id,key,parse=parseFloat){ $(id).addEventListener('input',()=>{ S[key]=parse($(id).value); changed(false); }); }
+bindRange('center','center'); bindRange('bw','bw'); bindRange('eirp','eirp'); bindRange('isd','isd'); bindRange('rings','rings');
+bindRange('guard','guard'); bindRange('sep','sep'); bindRange('bearing','bearing'); bindRange('offset','offset'); bindRange('pwr','pwr'); bindRange('ulDist','ulDist');
+$('wifiIdx').addEventListener('input',()=>{ S.wifiCh=wifiList()[+$('wifiIdx').value]; changed(false); });
+$('seed').addEventListener('change',()=>{ const v=parseInt($('seed').value); S.seed=isFinite(v)&&v>=0?v:42; changed(true); });
+function bindSeg(id,key){ document.querySelectorAll('#'+id+' button').forEach(b=>b.addEventListener('click',()=>{ const v=b.dataset.v; S[key]=isNaN(+v)?v:+v; changed(true); })); }
+bindSeg('arraySeg','array'); bindSeg('bldgSeg','building'); bindSeg('termSeg','terminal'); bindSeg('wifiWSeg','wifiW'); bindSeg('fsChanSeg','fsChan');
+bindSeg('clutSeg','clutter'); bindSeg('beamSeg','beam'); bindSeg('nsnapSeg','nsnap'); bindSeg('ulDevSeg','ulDev'); bindSeg('ulCoordSeg','ulCoord');
+document.querySelectorAll('#presetSeg button').forEach(b=>b.addEventListener('click',()=>{ if(b.dataset.v==='ref'){S.center=6625;S.bw=200;}else{S.center=6600;S.bw=350;} changed(true); }));
+$('resetBtn').addEventListener('click',()=>{ Object.assign(S,DEFAULTS); bearData=null; changed(true); setTimeout(runBearing,50); });
+$('bearBtn').addEventListener('click',()=>{ $('bearNote').textContent='Running…'; setTimeout(runBearing,20); });
+function writeHash(){ try{ const p=new URLSearchParams(); for(const k of Object.keys(DEFAULTS)) if(S[k]!==DEFAULTS[k]) p.set(k,S[k]); history.replaceState(null,'',p.toString()?'#'+p.toString():location.pathname+location.search); }catch(e){} }
+function readHash(){ try{ const p=new URLSearchParams(location.hash.slice(1)); for(const [k,v] of p){ if(k in DEFAULTS) S[k]=typeof DEFAULTS[k]==='number'?parseFloat(v):v; } }catch(e){} }
+$('linkBtn').addEventListener('click',()=>{ writeHash(); const t=location.href;
+  (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>{$('linkBtn').textContent='Link copied';},()=>{prompt('Scenario link',t);}).finally(()=>setTimeout(()=>{$('linkBtn').textContent='Copy scenario link';},1500)); });
+window.addEventListener('resize',()=>{ clearTimeout(timer); timer=setTimeout(renderAll,250); });
+readHash(); syncControls(); renderAll(); setTimeout(runBearing,50);
 </script>
 </body>
 </html>
